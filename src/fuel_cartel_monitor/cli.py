@@ -7,7 +7,12 @@ from datetime import date, timedelta
 
 from fuel_cartel_monitor import analysis
 from fuel_cartel_monitor.db import get_connection
-from fuel_cartel_monitor.ingest import ingest_date_range, ingest_latest
+from fuel_cartel_monitor.ingest import (
+    ingest_date_range,
+    ingest_latest,
+    ingest_prices_api,
+    ingest_stations_api,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
@@ -16,6 +21,16 @@ logger = logging.getLogger(__name__)
 def cmd_ingest(args: argparse.Namespace) -> None:
     """Handle the 'ingest' subcommand."""
     con = get_connection()
+
+    if args.api_stations:
+        count = ingest_stations_api(con, lat=args.lat, lng=args.lng, radius_km=args.radius)
+        print(json.dumps({"stations_ingested": count}))
+        return
+
+    if args.api_prices:
+        count = ingest_prices_api(con)
+        print(json.dumps({"prices_ingested": count}))
+        return
 
     if args.latest:
         result = ingest_latest(con)
@@ -134,6 +149,23 @@ def main() -> None:
     ingest_parser.add_argument("--to", dest="date_to", metavar="DATE", help="End date (ISO)")
     ingest_parser.add_argument(
         "--days", type=int, metavar="N", help="Ingest the last N days"
+    )
+    ingest_parser.add_argument(
+        "--api-stations", action="store_true",
+        help="Fetch stations near --lat/--lng via Tankerkoenig live API",
+    )
+    ingest_parser.add_argument(
+        "--api-prices", action="store_true",
+        help="Snapshot current prices for all stations in DB via live API",
+    )
+    ingest_parser.add_argument(
+        "--lat", type=float, default=52.37, help="Latitude (default: Hannover)"
+    )
+    ingest_parser.add_argument(
+        "--lng", type=float, default=9.73, help="Longitude (default: Hannover)"
+    )
+    ingest_parser.add_argument(
+        "--radius", type=float, default=25.0, help="Radius in km (for --api-stations)"
     )
     ingest_parser.set_defaults(func=cmd_ingest)
 

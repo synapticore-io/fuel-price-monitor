@@ -1,30 +1,14 @@
 """Fetch Brent crude oil prices from ECB Statistical Data Warehouse."""
+import csv
+import io
 import logging
+import os
 from datetime import date
 
 import duckdb
 import httpx
 
 logger = logging.getLogger(__name__)
-
-# ECB Statistical Data Warehouse — Brent crude oil in USD per barrel
-# Dataset: FM (Financial Markets), series: D.USD.EUR.SP00.A (EUR/USD rate)
-# We use the oil price dataset from ECB SDW:
-# https://data-api.ecb.europa.eu/service/data/EXR/D.USD.EUR.SP00.A
-ECB_OIL_URL = (
-    "https://data-api.ecb.europa.eu/service/data/"
-    "EXR/D.USD.EUR.SP00.A?format=csvdata"
-)
-
-# EIA free Brent price API (no key required for recent data)
-EIA_BRENT_URL = (
-    "https://api.eia.gov/v2/petroleum/pri/spt/data/"
-    "?api_key=DEMO_KEY&frequency=daily&data[0]=value"
-    "&facets[series][]=RBRTE&sort[0][column]=period&sort[0][direction]=desc&length=365"
-)
-
-# Fallback: use stooq.com for Brent data
-STOOQ_BRENT_URL = "https://stooq.com/q/d/l/?s=lcou.f&i=d"
 
 
 def fetch_eur_usd_rate(date_from: date, date_to: date) -> dict[str, float]:
@@ -41,22 +25,14 @@ def fetch_eur_usd_rate(date_from: date, date_to: date) -> dict[str, float]:
     with httpx.Client(timeout=30.0) as client:
         response = client.get(url)
         response.raise_for_status()
-        lines = response.text.strip().split("\n")
-        # Skip header line
-        for line in lines[1:]:
-            if not line.strip():
-                continue
-            parts = line.split(",")
-            if len(parts) < 10:
-                continue
+        reader = csv.DictReader(io.StringIO(response.text))
+        for row in reader:
             try:
-                # DATE column is at index 0, OBS_VALUE at index 7 typically
-                # Format: KEY_FAMILY, FREQ, CURRENCY, CURRENCY_DENOM, EXR_TYPE, EXR_SUFFIX,
-                # TIME_PERIOD, OBS_VALUE, ...
-                date_str = parts[6].strip().strip('"')
-                value = float(parts[7].strip().strip('"'))
-                rates[date_str] = value
-            except (ValueError, IndexError):
+                date_str = row.get("TIME_PERIOD", "").strip()
+                value = float(row.get("OBS_VALUE", "0").strip())
+                if date_str and value > 0:
+                    rates[date_str] = value
+            except (ValueError, KeyError):
                 continue
     return rates
 
@@ -102,9 +78,10 @@ def fetch_brent_prices(date_from: date, date_to: date) -> list[dict]:
 
 def _fetch_brent_usd_eia(date_from: date, date_to: date) -> dict[str, float]:
     """Fetch Brent crude prices in USD/barrel from EIA API."""
+    api_key = os.environ.get("EIA_API_KEY", "DEMO_KEY")
     url = (
-        "https://api.eia.gov/v2/petroleum/pri/spt/data/"
-        f"?frequency=daily&data[0]=value&facets[series][]=RBRTE"
+        f"https://api.eia.gov/v2/petroleum/pri/spt/data/"
+        f"?api_key={api_key}&frequency=daily&data[0]=value&facets[series][]=RBRTE"
         f"&sort[0][column]=period&sort[0][direction]=asc"
         f"&start={date_from.isoformat()}&end={date_to.isoformat()}&length=500"
     )

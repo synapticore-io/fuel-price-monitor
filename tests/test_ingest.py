@@ -1,4 +1,6 @@
 """Tests for ingest.py — CSV loading and ingestion logic."""
+import os
+import tempfile
 from pathlib import Path
 
 import duckdb
@@ -27,8 +29,6 @@ def test_load_prices_csv(con_with_data: duckdb.DuckDBPyConnection) -> None:
 
 def test_price_zero_mapped_to_null(con: duckdb.DuckDBPyConnection) -> None:
     """Prices of 0 in CSV should be stored as NULL (unavailable)."""
-    import tempfile
-
     stations_csv = str(FIXTURES_DIR / "sample_stations.csv")
     con.execute(f"""
         INSERT INTO stations (
@@ -66,8 +66,6 @@ def test_price_zero_mapped_to_null(con: duckdb.DuckDBPyConnection) -> None:
             FROM read_csv_auto('{tmp_path}', header=true)
         """)
     finally:
-        import os
-
         os.unlink(tmp_path)
 
     row = con.execute("SELECT diesel, e5 FROM price_changes LIMIT 1").fetchone()

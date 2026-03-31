@@ -1,19 +1,22 @@
 """Data ingestion from Tankerkoenig CSV files and live API."""
 import logging
-from datetime import date, timedelta
+import os
+import tempfile
+from datetime import date, datetime, timedelta
 
 import duckdb
 import httpx
 
 logger = logging.getLogger(__name__)
 
+TANKERKOENIG_API_KEY = os.environ.get("TANKERKOENIG_API_KEY", "")
+TANKERKOENIG_API_BASE = "https://creativecommons.tankerkoenig.de/json"
+
 # Tankerkoenig Azure DevOps raw file URL pattern
 AZURE_DEVOPS_BASE = (
     "https://dev.azure.com/tankerkoenig/tankerkoenig-data/"
     "_apis/git/repositories/tankerkoenig-data/items"
 )
-
-TANKERKOENIG_API_BASE = "https://creativecommons.tankerkoenig.de/json"
 
 
 def download_csv(target_date: date, data_type: str = "prices") -> str:
@@ -61,8 +64,6 @@ def ingest_day(con: duckdb.DuckDBPyConnection, target_date: date) -> int:
     csv_content = download_csv(target_date, "prices")
 
     # Write to a temp file for DuckDB to read
-    import tempfile
-
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".csv", delete=False, encoding="utf-8"
     ) as f:
@@ -72,8 +73,6 @@ def ingest_day(con: duckdb.DuckDBPyConnection, target_date: date) -> int:
     try:
         row_count = _load_prices_csv(con, tmp_path)
     finally:
-        import os
-
         os.unlink(tmp_path)
 
     # Record in ingestion log
@@ -87,6 +86,8 @@ def ingest_day(con: duckdb.DuckDBPyConnection, target_date: date) -> int:
 
 def _load_prices_csv(con: duckdb.DuckDBPyConnection, csv_path: str) -> int:
     """Load a prices CSV file into the price_changes table."""
+    count_before = con.execute("SELECT COUNT(*) FROM price_changes").fetchone()[0]
+
     con.execute(f"""
         INSERT INTO price_changes (
             timestamp, station_uuid, diesel, e5, e10,
@@ -105,10 +106,8 @@ def _load_prices_csv(con: duckdb.DuckDBPyConnection, csv_path: str) -> int:
         WHERE station_uuid IN (SELECT uuid FROM stations)
     """)
 
-    result = con.execute(
-        "SELECT COUNT(*) FROM read_csv_auto(?, header=true)", [csv_path]
-    ).fetchone()
-    return result[0] if result else 0
+    count_after = con.execute("SELECT COUNT(*) FROM price_changes").fetchone()[0]
+    return count_after - count_before
 
 
 def ingest_stations(con: duckdb.DuckDBPyConnection, target_date: date) -> int:
@@ -125,9 +124,6 @@ def ingest_stations(con: duckdb.DuckDBPyConnection, target_date: date) -> int:
 
     logger.info("Downloading stations for %s", target_date.isoformat())
     csv_content = download_csv(target_date, "stations")
-
-    import os
-    import tempfile
 
     with tempfile.NamedTemporaryFile(
         mode="w", suffix=".csv", delete=False, encoding="utf-8"
@@ -211,3 +207,120 @@ def ingest_latest(con: duckdb.DuckDBPyConnection) -> dict:
     """Ingest the most recent available day (yesterday typically)."""
     yesterday = date.today() - timedelta(days=1)
     return ingest_date_range(con, yesterday, yesterday)
+
+
+def _require_api_key() -> str:
+    """Return API key or raise with helpful message."""
+    if not TANKERKOENIG_API_KEY:
+        raise ValueError(
+            "TANKERKOENIG_API_KEY not set. "
+            "Register free at https://creativecommons.tankerkoenig.de/ "
+            "and set the env var."
+        )
+    return TANKERKOENIG_API_KEY
+
+
+def ingest_stations_api(
+    con: duckdb.DuckDBPyConnection,
+    lat: float = 52.37,
+    lng: float = 9.73,
+    radius_km: float = 25.0,
+) -> int:
+    """Fetch stations from Tankerkoenig live API and upsert into DB.
+
+    Returns number of stations ingested.
+    """
+    api_key = _require_api_key()
+    url = (
+        f"{TANKERKOENIG_API_BASE}/list.php"
+        f"?lat={lat}&lng={lng}&rad={radius_km}&sort=dist&type=all&apikey={api_key}"
+    )
+
+    with httpx.Client(timeout=30.0) as client:
+        response = client.get(url)
+        response.raise_for_status()
+        data = response.json()
+
+    if not data.get("ok"):
+        raise RuntimeError(f"Tankerkoenig API error: {data.get('message', 'unknown')}")
+
+    stations = data.get("stations", [])
+    if not stations:
+        logger.warning("No stations found at lat=%s lng=%s rad=%s", lat, lng, radius_km)
+        return 0
+
+    count = 0
+    for s in stations:
+        con.execute(
+            """
+            INSERT OR REPLACE INTO stations
+                (uuid, name, brand, street, house_number, post_code, city, latitude, longitude)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                s["id"], s.get("name", ""), s.get("brand", ""),
+                s.get("street", ""), s.get("houseNumber", ""),
+                s.get("postCode", ""), s.get("place", ""),
+                float(s["lat"]), float(s["lng"]),
+            ],
+        )
+        count += 1
+
+    logger.info("Ingested %d stations via API (lat=%s lng=%s rad=%skm)", count, lat, lng, radius_km)
+    return count
+
+
+def ingest_prices_api(con: duckdb.DuckDBPyConnection) -> int:
+    """Snapshot current prices for all stations in DB via Tankerkoenig API.
+
+    Fetches prices in batches of 10 (API limit).
+    Returns number of price records inserted.
+    """
+    api_key = _require_api_key()
+
+    station_ids = [
+        row[0] for row in con.execute("SELECT uuid FROM stations").fetchall()
+    ]
+    if not station_ids:
+        logger.warning("No stations in DB — run ingest_stations_api first")
+        return 0
+
+    now = datetime.now()
+    count = 0
+
+    # API allows max 10 station IDs per request
+    for i in range(0, len(station_ids), 10):
+        batch = station_ids[i : i + 10]
+        ids_str = ",".join(batch)
+        url = f"{TANKERKOENIG_API_BASE}/prices.php?ids={ids_str}&apikey={api_key}"
+
+        with httpx.Client(timeout=30.0) as client:
+            response = client.get(url)
+            response.raise_for_status()
+            data = response.json()
+
+        if not data.get("ok"):
+            logger.warning("Prices API error for batch %d: %s", i, data.get("message"))
+            continue
+
+        for sid, p in data.get("prices", {}).items():
+            if p.get("status") != "open":
+                continue
+
+            diesel = p.get("diesel")
+            e5 = p.get("e5")
+            e10 = p.get("e10")
+
+            con.execute(
+                """
+                INSERT INTO price_changes
+                    (timestamp, station_uuid, diesel, e5, e10,
+                     diesel_changed, e5_changed, e10_changed)
+                VALUES (?, ?, ?, ?, ?, true, true, true)
+                """,
+                [now, sid, diesel, e5, e10],
+            )
+            count += 1
+
+    logger.info("Ingested %d price snapshots via API", count)
+    return count

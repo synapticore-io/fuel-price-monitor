@@ -284,6 +284,8 @@ def station_price_history(
     if fuel_type not in ("diesel", "e5", "e10"):
         raise ValueError(f"fuel_type must be one of diesel/e5/e10, got: {fuel_type!r}")
 
+    fuel_column = {"diesel": "diesel", "e5": "e5", "e10": "e10"}[fuel_type]
+
     if station_uuid is not None:
         rows = con.execute(
             f"""
@@ -292,13 +294,13 @@ def station_price_history(
                 pc.station_uuid,
                 s.brand,
                 s.name,
-                pc.{fuel_type} AS price
+                NULLIF(pc.{fuel_column}, 0) AS price
             FROM price_changes pc
             JOIN stations s ON pc.station_uuid = s.uuid
             WHERE pc.station_uuid = ?
               AND pc.timestamp >= CURRENT_TIMESTAMP - INTERVAL (?) DAY
-              AND pc.{fuel_type} IS NOT NULL
-              AND pc.{fuel_type} > 0
+              AND pc.{fuel_column} IS NOT NULL
+              AND pc.{fuel_column} > 0
             ORDER BY pc.timestamp DESC
             """,
             [station_uuid, days],
@@ -311,7 +313,7 @@ def station_price_history(
                 pc.station_uuid,
                 s.brand,
                 s.name,
-                pc.{fuel_type} AS price
+                NULLIF(pc.{fuel_column}, 0) AS price
             FROM price_changes pc
             JOIN stations s ON pc.station_uuid = s.uuid
             WHERE 2 * 6371 * ASIN(SQRT(
@@ -320,8 +322,8 @@ def station_price_history(
                 POWER(SIN(RADIANS(s.longitude - ?) / 2), 2)
             )) <= 5
               AND pc.timestamp >= CURRENT_TIMESTAMP - INTERVAL (?) DAY
-              AND pc.{fuel_type} IS NOT NULL
-              AND pc.{fuel_type} > 0
+              AND pc.{fuel_column} IS NOT NULL
+              AND pc.{fuel_column} > 0
             ORDER BY pc.timestamp DESC
             LIMIT 200
             """,

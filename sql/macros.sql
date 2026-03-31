@@ -20,11 +20,6 @@ CREATE OR REPLACE MACRO leader_follower_lag(
         )) <= radius_km
         AND is_oligopol = true
     ),
-    leader_brands AS (
-        SELECT DISTINCT uuid, brand
-        FROM region_stations
-        WHERE brand IN ('ARAL', 'Aral', 'aral', 'Shell', 'SHELL', 'shell')
-    ),
     price_events AS (
         SELECT
             pc.timestamp,
@@ -44,55 +39,58 @@ CREATE OR REPLACE MACRO leader_follower_lag(
         JOIN region_stations rs ON pc.station_uuid = rs.uuid
         WHERE pc.timestamp >= CURRENT_TIMESTAMP - INTERVAL (lookback_days) DAY
     ),
-    leader_increases AS (
+    with_prev AS (
         SELECT
-            pe.timestamp AS leader_time,
-            lb.brand AS leader_brand,
-            pe.price AS leader_price,
-            LAG(pe.price) OVER (
-                PARTITION BY pe.station_uuid ORDER BY pe.timestamp
+            timestamp,
+            station_uuid,
+            brand,
+            price,
+            price_changed,
+            LAG(price) OVER (
+                PARTITION BY station_uuid ORDER BY timestamp
             ) AS prev_price
-        FROM price_events pe
-        JOIN leader_brands lb ON pe.station_uuid = lb.uuid
-        WHERE pe.price_changed = true
+        FROM price_events
+        WHERE price_changed = true AND price > 0
     ),
-    leader_increase_events AS (
-        SELECT leader_time, leader_brand, leader_price, prev_price
-        FROM leader_increases
-        WHERE prev_price IS NOT NULL AND leader_price > prev_price
+    increases AS (
+        SELECT timestamp, station_uuid, brand, price, prev_price,
+               price - prev_price AS delta
+        FROM with_prev
+        WHERE prev_price IS NOT NULL AND price > prev_price
     ),
-    follower_events AS (
+    leader_increases AS (
+        SELECT timestamp AS leader_time, brand AS leader_brand, delta AS leader_delta
+        FROM increases
+        WHERE brand IN ('Aral', 'ARAL', 'aral', 'Shell', 'SHELL', 'shell')
+    ),
+    follower_increases AS (
+        SELECT timestamp AS follower_time, brand AS follower_brand, delta AS follower_delta
+        FROM increases
+        WHERE brand NOT IN ('Aral', 'ARAL', 'aral', 'Shell', 'SHELL', 'shell')
+    ),
+    matched AS (
         SELECT
-            pe.timestamp AS follower_time,
-            pe.brand AS follower_brand
-        FROM price_events pe
-        WHERE pe.price_changed = true
-        AND pe.brand NOT IN (
-            SELECT DISTINCT brand FROM leader_brands
-        )
-    ),
-    lag_results AS (
-        SELECT
-            lie.leader_brand,
-            lie.leader_time,
-            fe.follower_brand,
-            MIN(fe.follower_time) AS follower_time
-        FROM leader_increase_events lie
-        JOIN follower_events fe
-            ON fe.follower_time > lie.leader_time
-            AND fe.follower_time <= lie.leader_time + INTERVAL 24 HOUR
-        GROUP BY lie.leader_brand, lie.leader_time, fe.follower_brand
+            li.leader_brand,
+            li.leader_time,
+            fi.follower_brand,
+            MIN(fi.follower_time) AS first_follower_time
+        FROM leader_increases li
+        JOIN follower_increases fi
+            ON fi.follower_time > li.leader_time
+            AND fi.follower_time <= li.leader_time + INTERVAL 24 HOUR
+            AND fi.follower_delta > 0
+        GROUP BY li.leader_brand, li.leader_time, fi.follower_brand
     )
     SELECT
         leader_brand,
         follower_brand,
         MEDIAN(
-            EPOCH(follower_time) / 60 - EPOCH(leader_time) / 60
+            (EPOCH(first_follower_time) - EPOCH(leader_time)) / 60
         ) AS median_lag_minutes,
         COUNT(*) AS event_count
-    FROM lag_results
+    FROM matched
     GROUP BY leader_brand, follower_brand
-    ORDER BY leader_brand, follower_brand
+    ORDER BY leader_brand, median_lag_minutes
 );
 
 -- ============================================================
@@ -166,9 +164,9 @@ CREATE OR REPLACE MACRO rockets_and_feathers(
         AVG(CASE WHEN direction = 'increase' THEN minutes_since_prev END) AS avg_increase_speed_min,
         AVG(CASE WHEN direction = 'decrease' THEN minutes_since_prev END) AS avg_decrease_speed_min,
         CASE
-            WHEN AVG(CASE WHEN direction = 'decrease' THEN minutes_since_prev END) > 0
-            THEN AVG(CASE WHEN direction = 'increase' THEN minutes_since_prev END) /
-                 AVG(CASE WHEN direction = 'decrease' THEN minutes_since_prev END)
+            WHEN AVG(CASE WHEN direction = 'increase' THEN minutes_since_prev END) > 0
+            THEN AVG(CASE WHEN direction = 'decrease' THEN minutes_since_prev END) /
+                 AVG(CASE WHEN direction = 'increase' THEN minutes_since_prev END)
             ELSE NULL
         END AS asymmetry_ratio
     FROM classified

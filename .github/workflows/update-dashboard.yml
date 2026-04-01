@@ -1,0 +1,53 @@
+name: Update Dashboard Data
+
+on:
+  schedule:
+    - cron: '15 6 * * *'  # Daily at 06:15 UTC (08:15 CET)
+  workflow_dispatch:  # Manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Restore DuckDB cache
+        uses: actions/cache@v4
+        with:
+          path: data/fuel_monitor.duckdb
+          key: duckdb-${{ github.run_number }}
+          restore-keys: duckdb-
+
+      - name: Ingest last 31 days
+        env:
+          TANKERKOENIG_DATA_USER: ${{ secrets.TANKERKOENIG_DATA_USER }}
+          TANKERKOENIG_DATA_PASS: ${{ secrets.TANKERKOENIG_DATA_PASS }}
+        run: |
+          uv run fuel-cartel-monitor ingest --days 31
+          uv run fuel-cartel-monitor ingest --brent
+
+      - name: Export dashboard data
+        env:
+          TANKERKOENIG_DATA_USER: ${{ secrets.TANKERKOENIG_DATA_USER }}
+          TANKERKOENIG_DATA_PASS: ${{ secrets.TANKERKOENIG_DATA_PASS }}
+        run: uv run fuel-cartel-monitor export --days 31
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/dashboard.json
+          git diff --cached --quiet || git commit -m "data: update dashboard $(date -u +%Y-%m-%d)"
+          git push

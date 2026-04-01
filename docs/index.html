@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fuel Cartel Monitor — Die Gier-Lücke im deutschen Tankstellenmarkt</title>
+<meta name="description" content="70% der Diesel-Preiserhöhung im März 2026 haben nichts mit dem Ölpreis zu tun. Datenanalyse auf Basis von 13 Mio. MTS-K-Datensätzen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0e14;--bg2:#111820;--bg3:#1a2230;
+  --text:#c8d1dc;--text2:#8a95a5;--text3:#5a6577;
+  --red:#e8534a;--red-dim:rgba(232,83,74,.12);
+  --green:#2dbe6e;--green-dim:rgba(45,190,110,.12);
+  --blue:#4d9af5;--amber:#e8a838;
+  --border:#1e2a3a;
+  --mono:'JetBrains Mono',monospace;
+  --serif:'Source Serif 4',Georgia,serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);line-height:1.6;min-height:100vh}
+a{color:var(--blue);text-decoration:none}
+.container{max-width:1100px;margin:0 auto;padding:2rem 1.5rem}
+header{border-bottom:1px solid var(--border);padding-bottom:2rem;margin-bottom:2.5rem}
+header h1{font-family:var(--serif);font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;color:#fff;line-height:1.2;margin-bottom:.5rem}
+header .kicker{font-size:.7rem;color:var(--amber);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem}
+header .subtitle{font-size:.85rem;color:var(--text2);max-width:720px}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2.5rem}
+.hero-card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.5rem}
+.hero-card .label{font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.25rem}
+.hero-card .big{font-size:clamp(2rem,5vw,3.2rem);font-weight:700;line-height:1}
+.hero-card .unit{font-size:.8rem;color:var(--text2);margin-top:.3rem}
+.hero-card.red .big{color:var(--red)}
+.hero-card.amber .big{color:var(--amber)}
+.hero-card.green .big{color:var(--green)}
+.callout{background:var(--bg3);border-left:3px solid var(--red);padding:1rem 1.2rem;margin-bottom:2rem;font-family:var(--serif);font-size:.95rem;font-style:italic;color:var(--text)}
+.callout strong{color:var(--red);font-style:normal}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.75rem;margin-bottom:2rem}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:1rem}
+.metric .label{font-size:.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem}
+.metric .value{font-size:1.3rem;font-weight:700;color:#fff}
+.metric .value.red{color:var(--red)} .metric .value.green{color:var(--green)}
+.metric .value.amber{color:var(--amber)} .metric .value.blue{color:var(--blue)}
+section{margin-bottom:2.5rem}
+section h2{font-family:var(--serif);font-size:1.2rem;font-weight:600;color:#fff;margin-bottom:.3rem}
+section .desc{font-size:.75rem;color:var(--text3);margin-bottom:1rem}
+.chart-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.2rem;margin-bottom:1.5rem}
+.chart-wrap{position:relative;height:280px}
+.chart-wrap.tall{height:340px}
+.legend{display:flex;flex-wrap:wrap;gap:1rem;margin-bottom:.6rem;font-size:.7rem;color:var(--text2)}
+.legend span{display:flex;align-items:center;gap:4px}
+.legend .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.toggle-row{display:flex;gap:.5rem;margin-bottom:1.2rem}
+.toggle-btn{background:var(--bg2);border:1px solid var(--border);color:var(--text2);padding:.35rem .9rem;border-radius:4px;cursor:pointer;font-family:var(--mono);font-size:.75rem;transition:all .15s}
+.toggle-btn:hover{border-color:var(--text3);color:var(--text)}
+.toggle-btn.active{background:var(--bg3);border-color:var(--blue);color:#fff}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+footer{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:2rem;font-size:.65rem;color:var(--text3);text-align:center;line-height:1.8}
+footer a{color:var(--text2)}
+@media(max-width:700px){.hero-grid,.two-col{grid-template-columns:1fr} .chart-wrap{height:240px}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="kicker">Datenanalyse · 13,2 Mio. Preisdatensätze · März 2026</div>
+  <h1>Die Gier-Lücke</h1>
+  <p class="subtitle">Wie viel der Preiserhöhung an deutschen Tankstellen tatsächlich vom Ölpreis kommt — und wie viel die Mineralölkonzerne einstreichen. Basierend auf MTS-K-Daten des Bundeskartellamtes.</p>
+</header>
+
+<div class="hero-grid">
+  <div class="hero-card red" id="hero-greed">
+    <div class="label">Gier-Marge Diesel</div>
+    <div class="big" id="hero-greed-val">—</div>
+    <div class="unit">Cent/Liter nicht durch Ölpreis erklärt</div>
+  </div>
+  <div class="hero-card amber" id="hero-pct">
+    <div class="label">Anteil am Preisanstieg</div>
+    <div class="big" id="hero-pct-val">—</div>
+    <div class="unit">der Diesel-Erhöhung ist keine Rohstoffkosten</div>
+  </div>
+</div>
+
+<div class="callout" id="callout"></div>
+<section>
+  <h2>Ölpreis vs. Zapfsäule</h2>
+  <p class="desc">Brent-Rohölpreis (EUR/Liter) gegen den Tankstellenpreis. Die wachsende Lücke ist die Gier-Marge — Kosten die nicht vom Ölmarkt kommen.</p>
+  <div class="toggle-row" id="fuel-toggle">
+    <div class="toggle-btn active" data-fuel="diesel">Diesel</div>
+    <div class="toggle-btn" data-fuel="e5">Super E5</div>
+  </div>
+  <div class="chart-box">
+    <div class="legend">
+      <span><span class="dot" style="background:var(--red)"></span>Zapfsäulenpreis</span>
+      <span><span class="dot" style="background:var(--blue)"></span>Brent Rohöl (EUR/L)</span>
+      <span><span class="dot" style="background:rgba(232,83,74,.15)"></span>Gier-Marge</span>
+    </div>
+    <div class="chart-wrap tall"><canvas id="spreadChart"></canvas></div>
+  </div>
+</section>
+
+<div class="metrics" id="cost-metrics"></div>
+<section>
+  <h2>Wann tanken?</h2>
+  <p class="desc">Durchschnittlicher E5-Preis nach Tageszeit und Wochentag. Basierend auf allen 17.755 Tankstellen, 30 Tage.</p>
+  <div class="two-col">
+    <div class="chart-box">
+      <div class="legend"><span><span class="dot" style="background:var(--amber)"></span>Ø Preis nach Uhrzeit</span></div>
+      <div class="chart-wrap"><canvas id="hourChart"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="legend"><span><span class="dot" style="background:var(--blue)"></span>Ø Preis nach Wochentag</span></div>
+      <div class="chart-wrap"><canvas id="dowChart"></canvas></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Der Oligopol-Mechanismus</h2>
+  <p class="desc">Shell oder ARAL erhöhen — alle anderen folgen binnen Minuten. Das Bundeskartellamt dokumentierte 2011 einen 3-Stunden-Takt. Heute läuft es in unter 20 Minuten.</p>
+  <div class="toggle-row" id="city-tabs"></div>
+  <div class="two-col">
+    <div class="chart-box">
+      <div class="legend">
+        <span><span class="dot" style="background:var(--red)"></span>Shell führt</span>
+        <span><span class="dot" style="background:var(--blue)"></span>ARAL führt</span>
+      </div>
+      <div class="chart-wrap"><canvas id="lfChart"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div class="legend">
+        <span><span class="dot" style="background:var(--red)"></span>Ø Erhöhung (Ct)</span>
+        <span><span class="dot" style="background:var(--green)"></span>Ø Senkung (Ct)</span>
+      </div>
+      <div class="chart-wrap"><canvas id="rfChart"></canvas></div>
+    </div>
+  </div>
+</section>
+<footer>
+  Datenquelle: <a href="https://creativecommons.tankerkoenig.de/" target="_blank">Tankerkönig</a> (CC BY-NC-SA 4.0) · Markttransparenzstelle für Kraftstoffe, Bundeskartellamt · Brent: <a href="https://www.eia.gov/" target="_blank">EIA</a><br>
+  Open Source: <a href="https://github.com/synapticore-io/fuel-cartel-monitor" target="_blank">github.com/synapticore-io/fuel-cartel-monitor</a> · DuckDB · MCP<br>
+  <span id="gen-time"></span>
+</footer>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const C={red:'#e8534a',blue:'#4d9af5',green:'#2dbe6e',amber:'#e8a838',
+  text2:'#8a95a5',grid:'rgba(255,255,255,0.04)',redFill:'rgba(232,83,74,0.12)'};
+let D,spreadChart,lfChart,rfChart,hourChart,dowChart,curFuel='diesel',curCity='Hannover';
+Chart.defaults.color=C.text2;
+Chart.defaults.font.family="'JetBrains Mono',monospace";
+Chart.defaults.font.size=11;
+const CO={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
+
+async function init(){
+  D=await(await fetch('data/dashboard.json')).json();
+  renderHero();renderCallout();renderCostMetrics();
+  renderSpreadChart();renderHourChart();renderDowChart();
+  renderCityTabs();renderLfChart();renderRfChart();
+  document.getElementById('gen-time').textContent=
+    'Stand: '+new Date(D.generated_at).toLocaleString('de-DE');
+  document.getElementById('fuel-toggle').onclick=e=>{
+    const b=e.target.closest('.toggle-btn'); if(!b)return;
+    curFuel=b.dataset.fuel;
+    document.querySelectorAll('#fuel-toggle .toggle-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    renderHero();renderCallout();renderCostMetrics();updateSpread();
+  };
+}
+function gm(){return (D.greed_margin||{})[curFuel]||{}}
+function renderHero(){
+  const g=gm();
+  document.getElementById('hero-greed-val').textContent=g.greed_cents?g.greed_cents.toFixed(1):'—';
+  document.getElementById('hero-pct-val').textContent=g.greed_pct?Math.round(g.greed_pct)+'%':'—';
+  document.querySelector('#hero-greed .label').textContent='Gier-Marge '+(curFuel==='diesel'?'Diesel':'Super E5');
+}
+function renderCallout(){
+  const g=gm();
+  if(!g.greed_cents){document.getElementById('callout').innerHTML='';return;}
+  const fuel=curFuel==='diesel'?'Diesel':'Super E5';
+  document.getElementById('callout').innerHTML=
+    `Von den <strong>${g.retail_rise_cents} Cent/Liter</strong> ${fuel}-Preisanstieg im März 2026 `+
+    `entfallen nur ${g.brent_rise_cents} Cent auf den gestiegenen Ölpreis. `+
+    `Die restlichen <strong>${g.greed_cents} Cent</strong> (${Math.round(g.greed_pct)}%) sind Margenausweitung `+
+    `der Mineralölkonzerne. Bei einer 50-Liter-Tankfüllung sind das <strong>${g.cost_per_tank_50l.toFixed(2)} €</strong> extra.`;
+}
+function renderCostMetrics(){
+  const g=gm(),bt=D.best_time||{};
+  document.getElementById('cost-metrics').innerHTML=`
+    <div class="metric"><div class="label">Ölpreis-Anstieg</div><div class="value blue">+${g.brent_rise_cents||'—'} Ct/L</div></div>
+    <div class="metric"><div class="label">Zapfsäulen-Anstieg</div><div class="value red">+${g.retail_rise_cents||'—'} Ct/L</div></div>
+    <div class="metric"><div class="label">Gier-Marge pro Tank</div><div class="value red">${g.cost_per_tank_50l?g.cost_per_tank_50l.toFixed(2)+'€':'—'}</div></div>
+    <div class="metric"><div class="label">Günstigste Uhrzeit</div><div class="value green">${bt.cheapest_hour||'—'}:00</div></div>
+    <div class="metric"><div class="label">Teuerste Uhrzeit</div><div class="value red">${bt.priciest_hour||'—'}:00</div></div>
+    <div class="metric"><div class="label">Tageszeit-Spread</div><div class="value amber">${bt.hour_spread_cents||'—'} Ct</div></div>
+  `;
+}
+function renderSpreadChart(){
+  const ctx=document.getElementById('spreadChart');
+  spreadChart=new Chart(ctx,{type:'line',data:{labels:[],datasets:[]},
+    options:{...CO,scales:{
+      x:{grid:{color:C.grid},ticks:{maxTicksLimit:8}},
+      y:{title:{display:true,text:'EUR/Liter'},grid:{color:C.grid},
+         ticks:{callback:v=>v.toFixed(2)}}
+    }}});
+  updateSpread();
+}
+function updateSpread(){
+  const bd=D['brent_decoupling_'+curFuel]||[];
+  if(!bd.length){spreadChart.data.labels=[];spreadChart.data.datasets=[];spreadChart.update();return;}
+  spreadChart.data.labels=bd.map(r=>r.date);
+  spreadChart.data.datasets=[
+    {label:'Zapfsäule',data:bd.map(r=>r.retail_avg),
+     borderColor:C.red,backgroundColor:'transparent',borderWidth:2,
+     pointRadius:3,pointBackgroundColor:C.red,tension:.3},
+    {label:'Brent (EUR/L)',data:bd.map(r=>r.brent_eur),
+     borderColor:C.blue,backgroundColor:'transparent',borderWidth:2,
+     pointRadius:3,pointBackgroundColor:C.blue,tension:.3},
+    {label:'Gier-Marge',data:bd.map(r=>r.spread),
+     borderColor:'transparent',backgroundColor:C.redFill,
+     fill:true,pointRadius:0,tension:.3}
+  ];
+  spreadChart.update();
+}
+function renderHourChart(){
+  const bt=D.best_time||{},h=bt.by_hour||[];
+  const prices=h.map(r=>r.avg_price),mn=Math.min(...prices),mx=Math.max(...prices);
+  hourChart=new Chart(document.getElementById('hourChart'),{type:'bar',
+    data:{labels:h.map(r=>r.hour+':00'),
+      datasets:[{data:prices,backgroundColor:prices.map(p=>p<=mn+.01?C.green:p>=mx-.01?C.red:C.amber+'88'),borderRadius:2}]},
+    options:{...CO,scales:{
+      x:{grid:{display:false},ticks:{maxRotation:45,font:{size:9}}},
+      y:{grid:{color:C.grid},ticks:{callback:v=>v.toFixed(2)},
+         min:Math.floor(mn*100)/100,max:Math.ceil(mx*100)/100}
+    }}});
+}
+function renderDowChart(){
+  const bt=D.best_time||{},w=bt.by_weekday||[];
+  const prices=w.map(r=>r.avg_price),mn=Math.min(...prices),mx=Math.max(...prices);
+  dowChart=new Chart(document.getElementById('dowChart'),{type:'bar',
+    data:{labels:w.map(r=>r.day),
+      datasets:[{data:prices,backgroundColor:prices.map(p=>p<=mn+.005?C.green:p>=mx-.005?C.red:C.blue+'88'),borderRadius:3}]},
+    options:{...CO,scales:{
+      x:{grid:{display:false}},
+      y:{grid:{color:C.grid},ticks:{callback:v=>v.toFixed(2)},
+         min:Math.floor(mn*100)/100,max:Math.ceil(mx*100)/100}
+    }}});
+}
+function renderCityTabs(){
+  const el=document.getElementById('city-tabs');
+  el.innerHTML=Object.keys(D.regions).map(c=>
+    `<div class="toggle-btn${c===curCity?' active':''}" data-city="${c}">${c}</div>`
+  ).join('');
+  el.onclick=e=>{const b=e.target.closest('.toggle-btn');if(!b)return;
+    curCity=b.dataset.city;
+    el.querySelectorAll('.toggle-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');updateLf();updateRf();};
+}
+function renderLfChart(){
+  lfChart=new Chart(document.getElementById('lfChart'),{type:'bar',
+    data:{labels:[],datasets:[]},
+    options:{...CO,indexAxis:'y',scales:{
+      x:{title:{display:true,text:'Median Lag (min)'},grid:{color:C.grid}},
+      y:{grid:{display:false}}}}});
+  updateLf();
+}
+function updateLf(){
+  const lf=(D.regions[curCity]||{}).leader_follower||[];
+  const fs=[...new Set(lf.map(r=>r.follower_brand))];
+  const mk=(re)=>fs.map(f=>{const r=lf.find(x=>x.leader_brand.match(re)&&x.follower_brand===f);return r?Math.round(r.median_lag_minutes*10)/10:0;});
+  lfChart.data.labels=fs;
+  lfChart.data.datasets=[
+    {label:'Shell',data:mk(/shell/i),backgroundColor:C.red,borderRadius:3},
+    {label:'ARAL',data:mk(/aral/i),backgroundColor:C.blue,borderRadius:3}];
+  lfChart.update();
+}
+function renderRfChart(){
+  rfChart=new Chart(document.getElementById('rfChart'),{type:'bar',
+    data:{labels:[],datasets:[]},
+    options:{...CO,scales:{
+      x:{grid:{display:false}},
+      y:{title:{display:true,text:'Cent/Änderung'},grid:{color:C.grid},beginAtZero:true}}}});
+  updateRf();
+}
+function updateRf(){
+  const rf=(D.regions[curCity]||{}).rockets_feathers||[];
+  rfChart.data.labels=rf.map(r=>r.brand);
+  rfChart.data.datasets=[
+    {label:'Erhöhung',data:rf.map(r=>Math.round(r.avg_increase_cents*10)/10),
+     backgroundColor:C.red,borderRadius:3,barPercentage:.7},
+    {label:'Senkung',data:rf.map(r=>Math.round(r.avg_decrease_cents*10)/10),
+     backgroundColor:C.green,borderRadius:3,barPercentage:.7}];
+  rfChart.update();
+}
+init();
+</script>
+</body>
+</html>

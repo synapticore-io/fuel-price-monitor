@@ -211,6 +211,7 @@ dependencies = [
     { name = "httpx" },
     { name = "mcp" },
     { name = "mcp-ui-server" },
+    { name = "python-dotenv" },
 ]
 
 [package.optional-dependencies]
@@ -228,6 +229,7 @@ requires-dist = [
     { name = "mcp-ui-server", specifier = ">=0.1.0" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5.0" },
 ]
 provides-extras = ["dev"]

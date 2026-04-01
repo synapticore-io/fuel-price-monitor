@@ -3,13 +3,11 @@ import argparse
 import json
 import logging
 import sys
-from datetime import date, timedelta
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from datetime import date, datetime, timedelta
+from pathlib import Path
 
 from fuel_cartel_monitor import analysis
+from fuel_cartel_monitor.brent import ingest_brent
 from fuel_cartel_monitor.db import get_connection
 from fuel_cartel_monitor.ingest import (
     ingest_date_range,
@@ -34,6 +32,17 @@ def cmd_ingest(args: argparse.Namespace) -> None:
     if args.api_prices:
         count = ingest_prices_api(con)
         print(json.dumps({"prices_ingested": count}))
+        return
+
+    if args.brent:
+        d_from = (
+            date.fromisoformat(args.date_from)
+            if args.date_from
+            else date.today() - timedelta(days=90)
+        )
+        d_to = date.fromisoformat(args.date_to) if args.date_to else date.today()
+        count = ingest_brent(con, d_from, d_to)
+        print(json.dumps({"brent_records": count}))
         return
 
     if args.latest:
@@ -134,8 +143,95 @@ def cmd_stats(_args: argparse.Namespace) -> None:
     print(json.dumps(stats, indent=2, default=str))
 
 
+def cmd_export(args: argparse.Namespace) -> None:
+    """Handle the 'export' subcommand — export analysis results as JSON for dashboard."""
+    con = get_connection()
+    out = Path(args.output)
+    out.mkdir(parents=True, exist_ok=True)
+
+    regions = [
+        {"name": "Hannover", "lat": 52.37, "lng": 9.73},
+        {"name": "Hamburg", "lat": 53.55, "lng": 9.99},
+        {"name": "Berlin", "lat": 52.52, "lng": 13.41},
+        {"name": "München", "lat": 48.14, "lng": 11.58},
+        {"name": "Köln", "lat": 50.94, "lng": 6.96},
+    ]
+
+    radius = args.radius
+    days = args.days
+    fuel = args.fuel
+
+    dashboard = {
+        "generated_at": datetime.now().isoformat(),
+        "parameters": {"radius_km": radius, "lookback_days": days, "fuel_type": fuel},
+        "stats": analysis.database_stats(con),
+        "regions": {},
+    }
+
+    for region in regions:
+        name = region["name"]
+        lat, lng = region["lat"], region["lng"]
+        logger.info("Exporting %s (lat=%s, lng=%s)", name, lat, lng)
+
+        lf = analysis.leader_follower_lag(con, lat, lng, radius, fuel, days)
+        rf = analysis.rockets_and_feathers(con, lat, lng, radius, fuel, days)
+
+        dashboard["regions"][name] = {
+            "lat": lat,
+            "lng": lng,
+            "leader_follower": [vars(r) for r in lf],
+            "rockets_feathers": [vars(r) for r in rf],
+        }
+
+    dashboard["best_time"] = analysis.best_time_to_tank(con, fuel)
+    dashboard["brand_ranking"] = analysis.brand_ranking(con, fuel)
+    dashboard["consumer_impact"] = analysis.consumer_impact(con, fuel)
+
+    for ft in ["diesel", "e5"]:
+        decoupling = analysis.brent_decoupling(con, ft, days)
+        dashboard[f"brent_decoupling_{ft}"] = [vars(r) for r in decoupling]
+
+    if dashboard["brent_decoupling_diesel"]:
+        d = dashboard["brent_decoupling_diesel"]
+        first, last = d[0], d[-1]
+        brent_rise = last["brent_eur"] - first["brent_eur"]
+        retail_rise = last["retail_avg"] - first["retail_avg"]
+        greed = retail_rise - brent_rise
+        dashboard["greed_margin"] = {
+            "diesel": {
+                "brent_rise_cents": round(brent_rise * 100, 1),
+                "retail_rise_cents": round(retail_rise * 100, 1),
+                "greed_cents": round(greed * 100, 1),
+                "greed_pct": round(greed / retail_rise * 100, 0) if retail_rise > 0 else 0,
+                "cost_per_tank_50l": round(greed * 50, 2),
+            },
+        }
+    if dashboard["brent_decoupling_e5"]:
+        d = dashboard["brent_decoupling_e5"]
+        first, last = d[0], d[-1]
+        brent_rise = last["brent_eur"] - first["brent_eur"]
+        retail_rise = last["retail_avg"] - first["retail_avg"]
+        greed = retail_rise - brent_rise
+        dashboard.setdefault("greed_margin", {})["e5"] = {
+            "brent_rise_cents": round(brent_rise * 100, 1),
+            "retail_rise_cents": round(retail_rise * 100, 1),
+            "greed_cents": round(greed * 100, 1),
+            "greed_pct": round(greed / retail_rise * 100, 0) if retail_rise > 0 else 0,
+            "cost_per_tank_50l": round(greed * 50, 2),
+        }
+
+    data_path = out / "dashboard.json"
+    data_path.write_text(json.dumps(dashboard, indent=2, default=str), encoding="utf-8")
+    logger.info("Dashboard data exported to %s", data_path)
+    print(json.dumps({"exported_to": str(data_path), "regions": len(regions)}))
+
+
 def main() -> None:
     """Main entry point for the CLI."""
+    from dotenv import load_dotenv
+
+    load_dotenv()
+
     parser = argparse.ArgumentParser(
         prog="fuel-cartel-monitor",
         description="Detect oligopolistic pricing patterns in German fuel markets",
@@ -159,6 +255,10 @@ def main() -> None:
     ingest_parser.add_argument(
         "--api-prices", action="store_true",
         help="Snapshot current prices for all stations in DB via live API",
+    )
+    ingest_parser.add_argument(
+        "--brent", action="store_true",
+        help="Fetch Brent crude oil prices (use with --from/--to)",
     )
     ingest_parser.add_argument(
         "--lat", type=float, default=52.37, help="Latitude (default: Hannover)"
@@ -198,6 +298,18 @@ def main() -> None:
     # --- stats ---
     stats_parser = subparsers.add_parser("stats", help="Show database statistics")
     stats_parser.set_defaults(func=cmd_stats)
+
+    # --- export ---
+    export_parser = subparsers.add_parser("export", help="Export analysis as JSON for dashboard")
+    export_parser.add_argument(
+        "--output", default="docs/data", help="Output directory (default: docs/data)"
+    )
+    export_parser.add_argument("--radius", type=float, default=25.0, help="Radius in km")
+    export_parser.add_argument(
+        "--fuel", choices=["diesel", "e5", "e10"], default="e5", help="Fuel type"
+    )
+    export_parser.add_argument("--days", type=int, default=30, help="Lookback days")
+    export_parser.set_defaults(func=cmd_export)
 
     args = parser.parse_args()
     args.func(args)

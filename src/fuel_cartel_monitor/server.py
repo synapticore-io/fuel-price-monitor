@@ -163,14 +163,19 @@ def analyze_brent_decoupling(
         data: {{
             labels: {dates},
             datasets: [
-                {{ label: 'Spread (EUR)', data: {spreads}, borderColor: '#58a6ff', fill: false, tension: 0.2 }},
-                {{ label: 'Z-Score', data: {z_scores}, borderColor: '#ff6347', fill: false, tension: 0.2, yAxisID: 'y2' }}
+                {{ label: 'Spread (EUR)', data: {spreads},
+                   borderColor: '#58a6ff', fill: false, tension: 0.2 }},
+                {{ label: 'Z-Score', data: {z_scores},
+                   borderColor: '#ff6347', fill: false,
+                   tension: 0.2, yAxisID: 'y2' }}
             ]
         }},
         options: {{
             scales: {{
                 y: {{ title: {{ display: true, text: 'Spread' }} }},
-                y2: {{ position: 'right', title: {{ display: true, text: 'Z-Score' }}, grid: {{ drawOnChartArea: false }} }}
+                y2: {{ position: 'right',
+                       title: {{ display: true, text: 'Z-Score' }},
+                       grid: {{ drawOnChartArea: false }} }}
             }}
         }}
     }}""")
@@ -217,7 +222,11 @@ def ingest_data(
     latest: bool = False, api_stations: bool = False, api_prices: bool = False,
     lat: float = 52.37, lng: float = 9.73, radius_km: float = 25.0,
 ) -> str:
-    """Ingest Tankerkoenig data. Use api_stations/api_prices for live API, or latest/date range for CSVs."""
+    """Ingest Tankerkoenig data.
+
+    Use api_stations/api_prices for live API,
+    or latest/date range for CSV bulk ingestion.
+    """
     con = _get_con()
     if api_stations:
         return _json({"stations_ingested": ingest_stations_api(con, lat, lng, radius_km)})
@@ -226,7 +235,10 @@ def ingest_data(
     if latest:
         return _json(ingest_latest(con))
     if not date_from or not date_to:
-        return "Error: provide latest=true, api_stations/api_prices=true, or both date_from and date_to"
+        return (
+            "Error: provide latest=true, api_stations/api_prices=true, "
+            "or both date_from and date_to"
+        )
     return _json(ingest_date_range(con, date.fromisoformat(date_from), date.fromisoformat(date_to)))
 
 

@@ -9,14 +9,23 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-TANKERKOENIG_API_KEY = os.environ.get("TANKERKOENIG_API_KEY", "")
 TANKERKOENIG_API_BASE = "https://creativecommons.tankerkoenig.de/json"
-TANKERKOENIG_DATA_USER = os.environ.get("TANKERKOENIG_DATA_USER", "")
-TANKERKOENIG_DATA_PASS = os.environ.get("TANKERKOENIG_DATA_PASS", "")
 TANKERKOENIG_DATA_BASE = (
     "https://data.tankerkoenig.de/tankerkoenig-organization/"
     "tankerkoenig-data/raw/branch/master"
 )
+
+
+def _data_credentials() -> tuple[str, str]:
+    """Return (username, password) for Tankerkoenig data server."""
+    user = os.environ.get("TANKERKOENIG_DATA_USER", "")
+    pw = os.environ.get("TANKERKOENIG_DATA_PASS", "")
+    if not user or not pw:
+        raise ValueError(
+            "TANKERKOENIG_DATA_USER and TANKERKOENIG_DATA_PASS not set. "
+            "Check your .env file."
+        )
+    return user, pw
 
 
 def download_csv(target_date: date, data_type: str = "prices") -> str:
@@ -33,21 +42,16 @@ def download_csv(target_date: date, data_type: str = "prices") -> str:
         httpx.HTTPStatusError: If the request fails
         ValueError: If credentials are not configured
     """
-    if not TANKERKOENIG_DATA_USER or not TANKERKOENIG_DATA_PASS:
-        raise ValueError(
-            "TANKERKOENIG_DATA_USER and TANKERKOENIG_DATA_PASS not set. "
-            "Check your .env file."
-        )
+    user, pw = _data_credentials()
 
     path = (
         f"/{data_type}/{target_date.year}/{target_date.month:02d}/"
         f"{target_date.isoformat()}-{data_type}.csv"
     )
     url = f"{TANKERKOENIG_DATA_BASE}{path}"
-    auth = (TANKERKOENIG_DATA_USER, TANKERKOENIG_DATA_PASS)
 
     with httpx.Client(timeout=120.0) as client:
-        response = client.get(url, auth=auth, follow_redirects=True)
+        response = client.get(url, auth=(user, pw), follow_redirects=True)
         response.raise_for_status()
         return response.text
 
@@ -218,14 +222,9 @@ def ingest_latest(con: duckdb.DuckDBPyConnection) -> dict:
 
 
 def _require_api_key() -> str:
-    """Return API key or raise with helpful message."""
-    if not TANKERKOENIG_API_KEY:
-        raise ValueError(
-            "TANKERKOENIG_API_KEY not set. "
-            "Register free at https://creativecommons.tankerkoenig.de/ "
-            "and set the env var."
-        )
-    return TANKERKOENIG_API_KEY
+    """Return API key (same as data password) or raise."""
+    _, pw = _data_credentials()
+    return pw
 
 
 def ingest_stations_api(

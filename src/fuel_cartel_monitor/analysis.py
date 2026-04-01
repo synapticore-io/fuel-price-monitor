@@ -384,3 +384,136 @@ def database_stats(con: duckdb.DuckDBPyConnection) -> dict:
             for r in recent_ingestions
         ],
     }
+
+
+
+def best_time_to_tank(
+    con: duckdb.DuckDBPyConnection,
+    fuel_type: str = "e5",
+) -> dict:
+    """Analyze best time to tank by hour of day and day of week.
+
+    Returns dict with 'by_hour' (0-23) and 'by_weekday' (0=Sun..6=Sat).
+    """
+    fuel_column = {"diesel": "diesel", "e5": "e5", "e10": "e10"}[fuel_type]
+
+    by_hour = con.execute(f"""
+        SELECT
+            EXTRACT(HOUR FROM timestamp) AS hour,
+            ROUND(AVG(NULLIF({fuel_column}, 0)), 4) AS avg_price
+        FROM price_changes
+        GROUP BY hour ORDER BY hour
+    """).fetchall()
+
+    by_dow = con.execute(f"""
+        SELECT
+            EXTRACT(DOW FROM timestamp) AS dow,
+            ROUND(AVG(NULLIF({fuel_column}, 0)), 4) AS avg_price
+        FROM price_changes
+        GROUP BY dow ORDER BY dow
+    """).fetchall()
+
+    dow_names = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"]
+
+    hours = [{"hour": int(r[0]), "avg_price": float(r[1])} for r in by_hour]
+    weekdays = [
+        {"day": dow_names[int(r[0])], "dow": int(r[0]), "avg_price": float(r[1])}
+        for r in by_dow
+    ]
+
+    cheapest_hour = min(hours, key=lambda x: x["avg_price"])
+    priciest_hour = max(hours, key=lambda x: x["avg_price"])
+    cheapest_day = min(weekdays, key=lambda x: x["avg_price"])
+    priciest_day = max(weekdays, key=lambda x: x["avg_price"])
+
+    return {
+        "by_hour": hours,
+        "by_weekday": weekdays,
+        "cheapest_hour": cheapest_hour["hour"],
+        "priciest_hour": priciest_hour["hour"],
+        "hour_spread_cents": round(
+            (priciest_hour["avg_price"] - cheapest_hour["avg_price"]) * 100, 1
+        ),
+        "cheapest_day": cheapest_day["day"],
+        "priciest_day": priciest_day["day"],
+        "day_spread_cents": round(
+            (priciest_day["avg_price"] - cheapest_day["avg_price"]) * 100, 1
+        ),
+    }
+
+
+def brand_ranking(
+    con: duckdb.DuckDBPyConnection,
+    fuel_type: str = "e5",
+    min_stations: int = 50,
+) -> list[dict]:
+    """Rank brands by average fuel price.
+
+    Only includes brands with at least min_stations stations.
+    """
+    fuel_column = {"diesel": "diesel", "e5": "e5", "e10": "e10"}[fuel_type]
+
+    rows = con.execute(f"""
+        SELECT
+            s.brand,
+            s.is_oligopol,
+            ROUND(AVG(NULLIF(pc.{fuel_column}, 0)), 4) AS avg_price,
+            COUNT(DISTINCT pc.station_uuid) AS station_count
+        FROM price_changes pc
+        JOIN stations s ON pc.station_uuid = s.uuid
+        WHERE s.brand IS NOT NULL AND s.brand != ''
+        GROUP BY s.brand, s.is_oligopol
+        HAVING COUNT(DISTINCT pc.station_uuid) >= ?
+        ORDER BY avg_price
+    """, [min_stations]).fetchall()
+
+    return [
+        {
+            "brand": r[0],
+            "is_oligopol": bool(r[1]),
+            "avg_price": float(r[2]),
+            "station_count": int(r[3]),
+        }
+        for r in rows
+    ]
+
+
+def consumer_impact(
+    con: duckdb.DuckDBPyConnection,
+    fuel_type: str = "e5",
+    tank_size_liters: int = 50,
+    tanks_per_year: int = 52,
+) -> dict:
+    """Calculate the cost impact of oligopol pricing on consumers.
+
+    Returns dict with premium per liter, per tank, per year,
+    and national estimate.
+    """
+    fuel_column = {"diesel": "diesel", "e5": "e5", "e10": "e10"}[fuel_type]
+
+    row = con.execute(f"""
+        SELECT
+            ROUND(AVG(CASE WHEN s.is_oligopol THEN
+                NULLIF(pc.{fuel_column}, 0) END), 4) AS oligo_avg,
+            ROUND(AVG(CASE WHEN NOT s.is_oligopol THEN
+                NULLIF(pc.{fuel_column}, 0) END), 4) AS indie_avg
+        FROM price_changes pc
+        JOIN stations s ON pc.station_uuid = s.uuid
+    """).fetchone()
+
+    oligo_avg = float(row[0]) if row[0] else 0
+    indie_avg = float(row[1]) if row[1] else 0
+    premium_eur = oligo_avg - indie_avg
+    premium_cents = round(premium_eur * 100, 2)
+    per_tank = round(premium_eur * tank_size_liters, 2)
+    per_year = round(per_tank * tanks_per_year, 2)
+
+    return {
+        "oligopol_avg": oligo_avg,
+        "independent_avg": indie_avg,
+        "premium_cents_per_liter": premium_cents,
+        "premium_per_tank_eur": per_tank,
+        "premium_per_year_eur": per_year,
+        "tank_size_liters": tank_size_liters,
+        "tanks_per_year": tanks_per_year,
+    }

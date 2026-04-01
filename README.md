@@ -46,9 +46,12 @@ uv sync --extra dev
 
 ```bash
 cp .env.example .env
-# Edit .env and add your Tankerkoenig API key (optional for CSV ingestion)
-# TANKERKOENIG_API_KEY=your-key-here
+# Edit .env with your Tankerkoenig credentials:
+# TANKERKOENIG_DATA_USER=your-username
+# TANKERKOENIG_DATA_PASS=your-api-key
 ```
+
+Register for free at [creativecommons.tankerkoenig.de](https://creativecommons.tankerkoenig.de/) to obtain credentials.
 
 ---
 
@@ -57,14 +60,17 @@ cp .env.example .env
 ### Ingest Data
 
 ```bash
-# Ingest latest available day (yesterday)
-fuel-cartel-monitor ingest --latest
-
-# Ingest a date range
-fuel-cartel-monitor ingest --from 2025-01-01 --to 2025-03-31
-
-# Ingest the last 7 days
+# Ingest last 7 days of historical CSV data
 fuel-cartel-monitor ingest --days 7
+
+# Ingest a specific date range
+fuel-cartel-monitor ingest --from 2026-03-01 --to 2026-03-31
+
+# Fetch stations near a location via live API
+fuel-cartel-monitor ingest --api-stations --lat 52.37 --lng 9.73 --radius 25
+
+# Snapshot current prices for all stations in DB
+fuel-cartel-monitor ingest --api-prices
 ```
 
 ### Analyze Pricing Patterns
@@ -86,6 +92,13 @@ fuel-cartel-monitor analyze brent-decoupling --fuel diesel --days 90
 
 # Regional price comparison (by postal code)
 fuel-cartel-monitor analyze regional --fuel e5
+```
+
+### Export Dashboard Data
+
+```bash
+# Export analysis results as JSON for GitHub Pages dashboard
+fuel-cartel-monitor export --days 30 --fuel e5
 ```
 
 ### Database Stats
@@ -142,7 +155,7 @@ The MCP server exposes all analysis functions as tools for use with Claude Deskt
 
 ### Claude Desktop Configuration
 
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Add to your Claude Desktop config (`claude_desktop_config.json`):
 
 ```json
 {
@@ -155,11 +168,17 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
         "run",
         "fuel-cartel-monitor",
         "serve"
-      ]
+      ],
+      "env": {
+        "TANKERKOENIG_DATA_USER": "your-username",
+        "TANKERKOENIG_DATA_PASS": "your-api-key"
+      }
     }
   }
 }
 ```
+
+Tools with visual output (leader-follower, rockets-feathers, brent-decoupling) render interactive Chart.js charts directly in Claude Desktop via [MCP UI](https://mcpui.dev/).
 
 ### Available MCP Tools
 
@@ -198,9 +217,9 @@ uv run ruff format src tests
 
 Historical CSV data from the German Market Transparency Unit for Fuels (Markttransparenzstelle für Kraftstoffe, MTS-K), provided via the Tankerkoenig project.
 
-- **Source:** [Azure DevOps — tankerkoenig-data](https://dev.azure.com/tankerkoenig/tankerkoenig-data/_git/tankerkoenig-data)
-- **License:** [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/)
-- **Attribution:** Bundesnetzagentur | Bundeskartellamt — MTS-K
+- **Source:** [data.tankerkoenig.de](https://data.tankerkoenig.de/)
+- **License:** [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) (non-commercial)
+- **Attribution:** Tankerkoenig · Bundeskartellamt — MTS-K
 
 ### Brent Crude Oil Prices
 

@@ -212,14 +212,12 @@ function updateSpread(){
   spreadChart.data.labels=bd.map(r=>r.date);
   spreadChart.data.datasets=[
     {label:'Zapfsäule',data:bd.map(r=>r.retail_avg),
-     borderColor:C.red,backgroundColor:'transparent',borderWidth:2,
-     pointRadius:3,pointBackgroundColor:C.red,tension:.3},
+     borderColor:C.red,backgroundColor:C.redFill,borderWidth:2.5,
+     pointRadius:3,pointBackgroundColor:C.red,tension:.3,
+     fill:{target:1,above:C.redFill}},
     {label:'Brent (EUR/L)',data:bd.map(r=>r.brent_eur),
      borderColor:C.blue,backgroundColor:'transparent',borderWidth:2,
-     pointRadius:3,pointBackgroundColor:C.blue,tension:.3},
-    {label:'Gier-Marge',data:bd.map(r=>r.spread),
-     borderColor:'transparent',backgroundColor:C.redFill,
-     fill:true,pointRadius:0,tension:.3}
+     pointRadius:3,pointBackgroundColor:C.blue,tension:.3,fill:false}
   ];
   spreadChart.update();
 }
@@ -227,22 +225,24 @@ function renderHourChart(){
   const bt=D.best_time||{},h=bt.by_hour||[];
   const prices=h.map(r=>r.avg_price),mn=Math.min(...prices),mx=Math.max(...prices);
   hourChart=new Chart(document.getElementById('hourChart'),{type:'bar',
-    data:{labels:h.map(r=>r.hour+':00'),
+    data:{labels:h.map(r=>r.hour+'h'),
       datasets:[{data:prices,backgroundColor:prices.map(p=>p<=mn+.01?C.green:p>=mx-.01?C.red:C.amber+'88'),borderRadius:2}]},
     options:{...CO,scales:{
-      x:{grid:{display:false},ticks:{maxRotation:45,font:{size:9}}},
+      x:{grid:{display:false},ticks:{maxRotation:0,font:{size:9},
+        callback:function(v,i){return i%3===0?this.getLabelForValue(v):'';}}},
       y:{grid:{color:C.grid},ticks:{callback:v=>v.toFixed(2)},
          min:Math.floor(mn*100)/100,max:Math.ceil(mx*100)/100}
     }}});
 }
 function renderDowChart(){
   const bt=D.best_time||{},w=bt.by_weekday||[];
+  const dayNames={So:'Sonntag',Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag'};
   const prices=w.map(r=>r.avg_price),mn=Math.min(...prices),mx=Math.max(...prices);
   dowChart=new Chart(document.getElementById('dowChart'),{type:'bar',
-    data:{labels:w.map(r=>r.day),
+    data:{labels:w.map(r=>dayNames[r.day]||r.day),
       datasets:[{data:prices,backgroundColor:prices.map(p=>p<=mn+.005?C.green:p>=mx-.005?C.red:C.blue+'88'),borderRadius:3}]},
     options:{...CO,scales:{
-      x:{grid:{display:false}},
+      x:{grid:{display:false},ticks:{font:{size:10}}},
       y:{grid:{color:C.grid},ticks:{callback:v=>v.toFixed(2)},
          min:Math.floor(mn*100)/100,max:Math.ceil(mx*100)/100}
     }}});
@@ -267,12 +267,13 @@ function renderLfChart(){
 }
 function updateLf(){
   const lf=(D.regions[curCity]||{}).leader_follower||[];
-  const fs=[...new Set(lf.map(r=>r.follower_brand))];
-  const mk=(re)=>fs.map(f=>{const r=lf.find(x=>x.leader_brand.match(re)&&x.follower_brand===f);return r?Math.round(r.median_lag_minutes*10)/10:0;});
-  lfChart.data.labels=fs;
+  const valid=lf.filter(r=>r.event_count>=100);
+  const fs=[...new Set(valid.map(r=>r.follower_brand))];
+  const mk=(re)=>fs.map(f=>{const r=valid.find(x=>x.leader_brand.match(re)&&x.follower_brand===f);return r?Math.round(r.median_lag_minutes*10)/10:0;});
+  lfChart.data.labels=fs.map(f=>'→ '+f);
   lfChart.data.datasets=[
-    {label:'Shell',data:mk(/shell/i),backgroundColor:C.red,borderRadius:3},
-    {label:'ARAL',data:mk(/aral/i),backgroundColor:C.blue,borderRadius:3}];
+    {label:'Shell führt',data:mk(/shell/i),backgroundColor:C.red,borderRadius:3},
+    {label:'ARAL führt',data:mk(/aral/i),backgroundColor:C.blue,borderRadius:3}];
   lfChart.update();
 }
 function renderRfChart(){
@@ -280,7 +281,19 @@ function renderRfChart(){
     data:{labels:[],datasets:[]},
     options:{...CO,scales:{
       x:{grid:{display:false}},
-      y:{title:{display:true,text:'Cent/Änderung'},grid:{color:C.grid},beginAtZero:true}}}});
+      y:{title:{display:true,text:'Cent/Änderung'},grid:{color:C.grid},beginAtZero:true}}},
+    plugins:[{afterDraw(chart){
+      const ctx=chart.ctx,meta=chart.getDatasetMeta(0);
+      if(!meta.data.length)return;
+      const rf=(D.regions[curCity]||{}).rockets_feathers||[];
+      ctx.save();ctx.font='500 10px JetBrains Mono';ctx.fillStyle=C.amber;ctx.textAlign='center';
+      meta.data.forEach((bar,i)=>{
+        if(!rf[i])return;
+        const ratio=(rf[i].avg_increase_cents/rf[i].avg_decrease_cents).toFixed(1);
+        ctx.fillText(ratio+':1',bar.x,bar.y-6);
+      });
+      ctx.restore();
+    }}]});
   updateRf();
 }
 function updateRf(){

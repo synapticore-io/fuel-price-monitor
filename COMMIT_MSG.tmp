@@ -1,0 +1,11 @@
+fix: dashboard clarity and data quality improvements
+
+- Filter outliers with < 100 events from leader-follower chart
+  (fixes Koeln TOTAL showing 892min lag from only 43 events)
+- Show magnitude ratio (increase/decrease) as annotation on
+  rockets-feathers bars (e.g. "2.4:1")
+- Fix spread chart: fill area BETWEEN retail and Brent lines
+  instead of separate spread dataset
+- Prefix follower brand labels with arrow for clarity
+- Full weekday names (Sonntag, not So)
+- Cleaner hour chart labels (every 3rd hour)

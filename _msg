@@ -1,0 +1,7 @@
+fix: update data to March 31 + fix Koeln outlier filtering
+
+- Ingest data through March 31 (13.6M total records)
+- Update Brent crude prices
+- Fix LF chart filter: require events >= 100 AND lag <= 120min
+  (removes Koeln TOTAL with 712/902 min lag - not a real follower)
+- Re-export dashboard.json with updated data

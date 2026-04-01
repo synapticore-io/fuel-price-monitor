@@ -267,7 +267,7 @@ function renderLfChart(){
 }
 function updateLf(){
   const lf=(D.regions[curCity]||{}).leader_follower||[];
-  const valid=lf.filter(r=>r.event_count>=100);
+  const valid=lf.filter(r=>r.event_count>=100 && r.median_lag_minutes<=120);
   const fs=[...new Set(valid.map(r=>r.follower_brand))];
   const mk=(re)=>fs.map(f=>{const r=valid.find(x=>x.leader_brand.match(re)&&x.follower_brand===f);return r?Math.round(r.median_lag_minutes*10)/10:0;});
   lfChart.data.labels=fs.map(f=>'→ '+f);

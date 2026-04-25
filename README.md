@@ -26,7 +26,6 @@ von CrudePriceAPI/EIA, EUR/USD-Kurse von der EZB.
 - **DuckDB** für lokale Analyse, **Parquet** für Monats-Archive
 - **Python 3.12** mit `uv` Package-Manager, `httpx`, `duckdb`
 - **GitHub Pages** für statisches Dashboard, Chart.js für Visualisierung
-- **MCP-Server** (`fuel-price-monitor serve`) für Claude Desktop / Code
 
 ## Quickstart
 
@@ -49,14 +48,13 @@ optional `CRUDE_PRICE_API_KEY` für aktuellen Brent.
 | `export --month YYYY-MM` | Schreibt `docs/data/dashboard-YYYY-MM.json` + `index.json` |
 | `archive --month YYYY-MM` | Monatsarchiv als zstd-Parquet |
 | `analyze {leader-follower,rockets-feathers,sync,brent-decoupling,breakdown}` | Einzelne Analyse |
-| `serve` | MCP-Server starten |
 | `stats` | DB-Statistiken |
 
 ## Deployment
 
-GitHub Action `update-dashboard.yml` läuft täglich 06:15 UTC: ingestiert die
-letzten 60 Tage, holt Brent, exportiert aktuellen + letzten Monat als JSON,
-committed und pusht. GitHub Pages baut `docs/` automatisch.
+GitHub Action `update-dashboard.yml` läuft täglich 18:15 UTC: ingestiert die
+letzten 60 Tage, holt Brent, exportiert alle Monate mit Daten als JSON
+(`--all-months`), committed und pusht. GitHub Pages baut `docs/` automatisch.
 
 ## Lizenz
 

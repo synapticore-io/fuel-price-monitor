@@ -34,21 +34,18 @@ jobs:
           key: duckdb-${{ github.run_number }}
           restore-keys: duckdb-
 
-      # Ingest-Fenster: 150 Tage zurueck (~5 Monate) deckt Backfill ab dem
-      # Jahresanfang ab und faengt Cron-Ausfaelle bis zu mehreren Monaten
-      # zurueck auf. Bereits ingestete Tage werden via ingestion_log
-      # uebersprungen (siehe ingest.ingest_day), keine Duplikate.
-      - name: Ingest last 150 days + Brent
+      # 60 Tage Ingest-Fenster — Tankerkoenig blockt CSVs aelter als ~2
+      # Monate via data.tankerkoenig.de (Retention-Policy), groessere
+      # Fenster bringen nur Connection-Refused-Spam. Bereits ingestete
+      # Tage werden via ingestion_log uebersprungen, idempotent.
+      - name: Ingest last 60 days + Brent
         env:
           TANKERKOENIG_DATA_USER: ${{ secrets.TANKERKOENIG_DATA_USER }}
           TANKERKOENIG_DATA_PASS: ${{ secrets.TANKERKOENIG_DATA_PASS }}
           CRUDE_PRICE_API_KEY: ${{ secrets.CRUDE_PRICE_API_KEY }}
         run: |
-          uv run fuel-price-monitor ingest --days 150
-          # Brent 180 Tage zurueck — EIA hat ~8 Tage Lag, deckt aber Historie ab.
-          uv run fuel-price-monitor ingest --brent \
-            --from "$(date -u -d '180 days ago' +%Y-%m-%d)" \
-            --to "$(date -u +%Y-%m-%d)"
+          uv run fuel-price-monitor ingest --days 60
+          uv run fuel-price-monitor ingest --brent
 
       - name: Export ALL months with data (refreshes index.json)
         run: |

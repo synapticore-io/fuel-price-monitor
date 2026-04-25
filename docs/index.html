@@ -209,7 +209,25 @@ let curFuel = 'diesel', curCity = 'Hannover', curMonth = null;
 Chart.defaults.color = C.text2;
 Chart.defaults.font.family = "'JetBrains Mono',monospace";
 Chart.defaults.font.size = 11;
+Chart.defaults.locale = 'de-DE';
 const CO = {responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}};
+
+// Standard-Tooltips lokalisiert auf Komma. Wert kommt als EUR/Liter, anzeigen mit 2 Nachkommastellen.
+const tooltipEurL = {
+  callbacks: {
+    label: ctx => `${ctx.dataset.label || ''}: ${fmt(ctx.parsed.y, 2)} €/L`.trim()
+  }
+};
+const tooltipMin = {
+  callbacks: {
+    label: ctx => `${ctx.dataset.label || ''}: ${fmt(ctx.parsed.x ?? ctx.parsed.y, 1)} Min.`.trim()
+  }
+};
+const tooltipCent = {
+  callbacks: {
+    label: ctx => `${ctx.dataset.label || ''}: ${fmt(ctx.parsed.y, 1)} ct`.trim()
+  }
+};
 
 async function init() {
   IDX = await (await fetch('data/index.json')).json();
@@ -329,10 +347,10 @@ function renderSpreadChart() {
   spreadChart = new Chart(ctx, {
     type:'line',
     data:{labels:[], datasets:[]},
-    options:{...CO, scales:{
+    options:{...CO, plugins:{...CO.plugins, tooltip:tooltipEurL}, scales:{
       x:{grid:{color:C.grid}, ticks:{maxTicksLimit:10}},
-      y:{title:{display:true, text:'EUR/Liter'}, grid:{color:C.grid},
-         ticks:{callback:v => v.toFixed(2)}}
+      y:{title:{display:true, text:'€/Liter'}, grid:{color:C.grid},
+         ticks:{callback:v => fmt(v, 2)}}
     }}
   });
   updateSpread();
@@ -369,13 +387,13 @@ function renderHourChart() {
   if (hourChart) hourChart.destroy();
   hourChart = new Chart(document.getElementById('hourChart'), {
     type:'bar',
-    data:{labels:h.map(r => r.hour + 'h'),
-      datasets:[{data:prices, borderRadius:2,
+    data:{labels:h.map(r => r.hour + ' Uhr'),
+      datasets:[{label:'Ø Preis', data:prices, borderRadius:2,
         backgroundColor:prices.map(p => p <= mn+.01 ? C.green : p >= mx-.01 ? C.red : C.amber+'88')}]},
-    options:{...CO, scales:{
+    options:{...CO, plugins:{...CO.plugins, tooltip:tooltipEurL}, scales:{
       x:{grid:{display:false}, ticks:{maxRotation:0, font:{size:9},
         callback:function(v,i){return i%3===0 ? this.getLabelForValue(v) : '';}}},
-      y:{grid:{color:C.grid}, ticks:{callback:v => v.toFixed(2)},
+      y:{grid:{color:C.grid}, ticks:{callback:v => fmt(v, 2)},
          min:Math.floor(mn*100)/100, max:Math.ceil(mx*100)/100}
     }}
   });
@@ -393,11 +411,11 @@ function renderDowChart() {
   dowChart = new Chart(document.getElementById('dowChart'), {
     type:'bar',
     data:{labels:w.map(r => dayNames[r.day] || r.day),
-      datasets:[{data:prices, borderRadius:3,
+      datasets:[{label:'Ø Preis', data:prices, borderRadius:3,
         backgroundColor:prices.map(p => p <= mn+.005 ? C.green : p >= mx-.005 ? C.red : C.blue+'88')}]},
-    options:{...CO, scales:{
+    options:{...CO, plugins:{...CO.plugins, tooltip:tooltipEurL}, scales:{
       x:{grid:{display:false}, ticks:{font:{size:10}}},
-      y:{grid:{color:C.grid}, ticks:{callback:v => v.toFixed(2)},
+      y:{grid:{color:C.grid}, ticks:{callback:v => fmt(v, 2)},
          min:Math.floor(mn*100)/100, max:Math.ceil(mx*100)/100}
     }}
   });
@@ -424,8 +442,9 @@ function renderLfChart() {
   lfChart = new Chart(document.getElementById('lfChart'), {
     type:'bar',
     data:{labels:[], datasets:[]},
-    options:{...CO, indexAxis:'y', scales:{
-      x:{title:{display:true, text:'Median Lag (min)'}, grid:{color:C.grid}},
+    options:{...CO, indexAxis:'y', plugins:{...CO.plugins, tooltip:tooltipMin}, scales:{
+      x:{title:{display:true, text:'Median Lag (Minuten)'}, grid:{color:C.grid},
+         ticks:{callback:v => fmt(v, 0)}},
       y:{grid:{display:false}}}}
   });
   updateLf();
@@ -482,9 +501,10 @@ function renderRfChart() {
   rfChart = new Chart(document.getElementById('rfChart'), {
     type:'bar',
     data:{labels:[], datasets:[]},
-    options:{...CO, scales:{
+    options:{...CO, plugins:{...CO.plugins, tooltip:tooltipCent}, scales:{
       x:{grid:{display:false}, ticks:{font:{size:10}}},
-      y:{title:{display:true, text:'Cent/Änderung'}, grid:{color:C.grid}, beginAtZero:true}}},
+      y:{title:{display:true, text:'Cent/Änderung'}, grid:{color:C.grid}, beginAtZero:true,
+         ticks:{callback:v => fmt(v, 1)}}}},
     plugins:[{afterDraw(chart) {
       const ctx = chart.ctx, meta = chart.getDatasetMeta(0);
       if (!meta.data.length) return;
@@ -497,7 +517,7 @@ function renderRfChart() {
         if (!rf[i]) return;
         const ratio = rf[i].avg_increase_cents / rf[i].avg_decrease_cents;
         if (!isFinite(ratio) || ratio <= 0) return;
-        ctx.fillText(ratio.toFixed(1) + ':1', bar.x, bar.y - 6);
+        ctx.fillText(fmt(ratio, 1) + ':1', bar.x, bar.y - 6);
       });
       ctx.restore();
     }}]

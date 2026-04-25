@@ -10,7 +10,7 @@
 
 **[→ Live-Dashboard](https://synapticore-io.github.io/fuel-price-monitor/)**
 
-> *Symbolbild: KI-generiertes Tankstellen-Schild mit ~2023er Preisen — der ironische Kontrast zu den aktuellen 2,27 €/L Diesel im verlinkten Dashboard ist Teil der Pointe.*
+> *Bild komplett KI-generiert mit GPT Image 2. Die Preise auf dem Schild liegen auf ~2023er Niveau — der ironische Kontrast zu den aktuellen 2,27 €/L Diesel im verlinkten Dashboard ist Teil der Pointe.*
 
 Der Monatsdurchschnittspreis pro Liter Diesel und Super E5 wird in seine
 gesetzlich fixen, marktbedingten und residualen Komponenten zerlegt:

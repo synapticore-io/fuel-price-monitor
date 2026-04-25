@@ -354,7 +354,7 @@ function updateKicker() {
 }
 
 const COMPONENTS = [
-  {key:'energy_tax', label:'Energiesteuer',             color:C.amber,  hint:'Fest per EnergieStG — Bund kassiert. Diesel 47,04 ct/L · Benzin 65,45 ct/L.'},
+  {key:'energy_tax', label:'Energiesteuer',             color:C.amber,  hint:'Fest per EnergieStG — Bund kassiert. Diesel 47,04 ct/L · Benzin 65,45 ct/L.', sourceKey:'energy_tax_source'},
   {key:'co2',        label:'CO₂-Abgabe',                color:C.teal,   hint:'BEHG §10: 2026 Korridor 55–65 €/t CO₂, Mindestpreis angenommen. × Emissionsfaktor (2,64 kg/L Diesel, 2,32 kg/L Benzin).'},
   {key:'brent',      label:'Rohöl (Brent)',             color:C.blue,   hint:'Monats-Durchschnitt des Brent-Spotpreises, umgerechnet in EUR/Liter.'},
   {key:'vat',        label:'Mehrwertsteuer',            color:C.violet, hint:'19 % auf den Bruttopreis — wird auch auf Energie- und CO₂-Abgabe fällig.'},
@@ -383,16 +383,18 @@ function renderBreakdown() {
     return `<div class="breakdown-seg ${c.key}" style="width:${pct}%;background:${c.color}" title="${c.label}: ${fmtCent(v)} (${fmtPct(pct)})">${label}</div>`;
   }).join('');
 
-  // Legend
+  // Legend — Hint kommt aus dem Backend wenn ein sourceKey vorhanden ist
+  // (z.B. energy_tax_source spiegelt Tankrabatt-Periode wieder).
   document.getElementById('bd-legend').innerHTML = COMPONENTS.map(c => {
     const v = pb[c.key + '_eur'];
     const pct = v / total * 100;
+    const hint = (c.sourceKey && pb[c.sourceKey]) || c.hint;
     return `<div class="bl-row">
       <div class="bl-swatch" style="background:${c.color}"></div>
       <div class="bl-text">
         <div class="bl-name">${c.label}</div>
         <div class="bl-value">${fmtCent(v)} <span class="bl-pct">· ${fmtPct(pct)}</span></div>
-        <div class="bl-hint">${c.hint}</div>
+        <div class="bl-hint">${hint}</div>
       </div>
     </div>`;
   }).join('');

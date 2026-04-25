@@ -12,10 +12,72 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Steuer- und Emissions-Konstanten (Deutschland, Stand 2026)
 # ---------------------------------------------------------------------------
-# Energiesteuer: fest per Gesetz (EnergieStG) — EUR pro Liter, netto
-ENERGY_TAX_DIESEL_EUR = 0.4704
-ENERGY_TAX_E5_EUR = 0.6545
-ENERGY_TAX_E10_EUR = 0.6545  # gleicher Satz wie Super
+# Energiesteuer: fest per Gesetz (EnergieStG §2) — EUR pro Liter, netto.
+# Tankrabatt 2026: -14,04 ct/L auf Diesel UND Benzin vom 1.5. bis 30.6.2026
+# (Bundestag-Beschluss 24.4.2026, Union+SPD).
+# Quellen:
+#   https://www.bundestag.de/dokumente/textarchiv/2026/kw17-de-energiesteuersenkung-1165890
+#   https://www.gesetze-im-internet.de/energiestg/__2.html
+ENERGY_TAX_DIESEL_NORMAL_EUR = 0.4704
+ENERGY_TAX_DIESEL_RABATT_EUR = 0.3300  # 47,04 - 14,04
+ENERGY_TAX_E5_NORMAL_EUR = 0.6545
+ENERGY_TAX_E5_RABATT_EUR = 0.5141  # 65,45 - 14,04
+ENERGY_TAX_E10_NORMAL_EUR = 0.6545
+ENERGY_TAX_E10_RABATT_EUR = 0.5141
+
+# Tankrabatt-Perioden als half-open Intervalle [start, end)
+TANKRABATT_PERIODS = [
+    (date(2026, 5, 1), date(2026, 7, 1)),  # Mai + Juni 2026
+]
+
+# Backwards-compat / Default-Aliase fuer den Normalsatz
+ENERGY_TAX_DIESEL_EUR = ENERGY_TAX_DIESEL_NORMAL_EUR
+ENERGY_TAX_E5_EUR = ENERGY_TAX_E5_NORMAL_EUR
+ENERGY_TAX_E10_EUR = ENERGY_TAX_E10_NORMAL_EUR
+
+
+def _to_date(x) -> date:
+    """Coerce date-or-isoformat-string to a date instance."""
+    return x if isinstance(x, date) else date.fromisoformat(str(x))
+
+
+def _energy_tax_for_period(fuel_type: str, date_from, date_to) -> tuple[float, str]:
+    """Days-weighted average energy tax (EUR/L) for [date_from, date_to).
+
+    Accounts for Tankrabatt overlaps. Returns (rate_eur, source_string).
+    Periods fully inside or outside a Tankrabatt window return the exact
+    rate; partial overlaps return the tagesgewichtete Mittelung.
+    """
+    df = _to_date(date_from)
+    dt = _to_date(date_to)
+    normal = {
+        "diesel": ENERGY_TAX_DIESEL_NORMAL_EUR,
+        "e5": ENERGY_TAX_E5_NORMAL_EUR,
+        "e10": ENERGY_TAX_E10_NORMAL_EUR,
+    }[fuel_type]
+    rabatt = {
+        "diesel": ENERGY_TAX_DIESEL_RABATT_EUR,
+        "e5": ENERGY_TAX_E5_RABATT_EUR,
+        "e10": ENERGY_TAX_E10_RABATT_EUR,
+    }[fuel_type]
+    total_days = (dt - df).days
+    rabatt_days = 0
+    for r_start, r_end in TANKRABATT_PERIODS:
+        overlap_start = max(df, r_start)
+        overlap_end = min(dt, r_end)
+        if overlap_start < overlap_end:
+            rabatt_days += (overlap_end - overlap_start).days
+    if total_days <= 0:
+        return normal, "EnergieStG §2 (Normalsatz)"
+    rate = (rabatt_days * rabatt + (total_days - rabatt_days) * normal) / total_days
+    if rabatt_days == 0:
+        src = "EnergieStG §2 (Diesel 47,04 ct/L · Super 65,45 ct/L)"
+    elif rabatt_days == total_days:
+        src = "EnergieStG §2 mit Tankrabatt 1.5.–30.6.2026 (-14,04 ct/L auf Diesel und Benzin)"
+    else:
+        pct = round(rabatt_days / total_days * 100)
+        src = f"EnergieStG §2 — {pct} % der Periode mit Tankrabatt (-14,04 ct/L)"
+    return rate, src
 
 # CO2-Preis nach BEHG § 10 — 2026 Preiskorridor 55–65 €/t, Mindestpreis 55
 # Erste EEX-Auktion: 1. Juli 2026. Vor diesem Datum gibt es keinen realisierten
@@ -542,11 +604,9 @@ def price_breakdown(
         raise ValueError(f"fuel_type must be one of diesel/e5/e10, got: {fuel_type!r}")
 
     fuel_column = {"diesel": "diesel", "e5": "e5", "e10": "e10"}[fuel_type]
-    energy_tax_raw = {
-        "diesel": ENERGY_TAX_DIESEL_EUR,
-        "e5": ENERGY_TAX_E5_EUR,
-        "e10": ENERGY_TAX_E10_EUR,
-    }[fuel_type]
+    energy_tax_raw, energy_tax_source = _energy_tax_for_period(
+        fuel_type, date_from, date_to
+    )
     co2_kg = {
         "diesel": CO2_KG_PER_LITER_DIESEL,
         "e5": CO2_KG_PER_LITER_E5,
@@ -595,6 +655,7 @@ def price_breakdown(
         "co2_price_eur_per_ton": CO2_PRICE_EUR_PER_TON,
         "co2_kg_per_liter": co2_kg,
         "co2_price_source": CO2_PRICE_SOURCE,
+        "energy_tax_source": energy_tax_source,
     }
 
 

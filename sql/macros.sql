@@ -263,10 +263,8 @@ CREATE OR REPLACE MACRO brent_decoupling(
         GROUP BY CAST(timestamp AS DATE)
     ),
     -- ASOF LEFT JOIN: fuer jeden Retail-Tag den letzten verfuegbaren
-    -- Brent-Wert nehmen. Brent (ICE) wird Mo-Fr quotiert; Wochenenden,
-    -- Feiertage und gelegentliche API-Luecken in CrudePriceAPI/EIA werden
-    -- mit dem letzten Spot fortgeschrieben. Marktueblich, weil der
-    -- Tagesschlusspreis bis zur naechsten Notierung gueltig bleibt.
+    -- Brent-Wert nehmen (Wochenenden, Feiertage, API-Luecken werden mit
+    -- dem letzten Spot fortgeschrieben). Marktueblich.
     joined AS (
         SELECT
             dr.date,

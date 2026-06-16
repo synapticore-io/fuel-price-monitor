@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-15T21:25:11.414859",
+  "generated_at": "2026-06-16T21:21:25.698322",
   "parameters": {
     "radius_km": 25.0,
     "fuel_type": "e5",
@@ -10,12 +10,22 @@
   },
   "stats": {
     "station_count": 17810,
-    "price_record_count": 31140792,
+    "price_record_count": 31373227,
     "brent_price_count": 168,
-    "ingestion_count": 220,
+    "ingestion_count": 222,
     "price_date_from": "2026-02-24 23:00:03",
-    "price_date_to": "2026-06-14 21:59:18",
+    "price_date_to": "2026-06-15 21:59:31",
     "recent_ingestions": [
+      {
+        "file_path": "prices/2026-06-15",
+        "ingested_at": "2026-06-16 21:21:05.291224",
+        "row_count": 232435
+      },
+      {
+        "file_path": "stations/2026-06-15",
+        "ingested_at": "2026-06-16 21:20:43.417837",
+        "row_count": 17810
+      },
       {
         "file_path": "prices/2026-06-14",
         "ingested_at": "2026-06-15 21:24:52.383746",
@@ -55,16 +65,6 @@
         "file_path": "stations/2026-06-11",
         "ingested_at": "2026-06-12 20:28:42.418768",
         "row_count": 17810
-      },
-      {
-        "file_path": "prices/2026-06-10",
-        "ingested_at": "2026-06-11 20:37:37.698556",
-        "row_count": 182548
-      },
-      {
-        "file_path": "stations/2026-06-10",
-        "ingested_at": "2026-06-11 20:37:16.102686",
-        "row_count": 17808
       }
     ]
   },
@@ -149,8 +149,8 @@
         },
         {
           "brand": "Shell",
-          "avg_increase_cents": 5.118037135278515,
-          "avg_decrease_cents": 1.956692913385827,
+          "avg_increase_cents": 5.118037135278516,
+          "avg_decrease_cents": 1.9566929133858273,
           "avg_increase_speed_min": 89.44246242280842,
           "avg_decrease_speed_min": 34.72449967186113,
           "asymmetry_ratio": 0.38823282288129574
@@ -310,7 +310,7 @@
         {
           "brand": "ESSO",
           "avg_increase_cents": 4.65513392857143,
-          "avg_decrease_cents": 1.8280542986425343,
+          "avg_decrease_cents": 1.828054298642534,
           "avg_increase_speed_min": 57.78270089277482,
           "avg_decrease_speed_min": 39.6928582202542,
           "asymmetry_ratio": 0.6869332448462515
@@ -429,7 +429,7 @@
         },
         {
           "brand": "TOTAL",
-          "avg_increase_cents": 3.430894308943091,
+          "avg_increase_cents": 3.4308943089430906,
           "avg_decrease_cents": 1.3766666666666671,
           "avg_increase_speed_min": 46.669783197767366,
           "avg_decrease_speed_min": 36.10227777779102,
@@ -497,8 +497,8 @@
         },
         {
           "brand": "ESSO",
-          "avg_increase_cents": 4.866103739445115,
-          "avg_decrease_cents": 1.9209095402867031,
+          "avg_increase_cents": 4.866103739445116,
+          "avg_decrease_cents": 1.9209095402867034,
           "avg_increase_speed_min": 48.695034177576176,
           "avg_decrease_speed_min": 41.12458395129654,
           "asymmetry_ratio": 0.844533424113176
@@ -514,7 +514,7 @@
         {
           "brand": "Shell",
           "avg_increase_cents": 5.179470626210459,
-          "avg_decrease_cents": 1.925242270419936,
+          "avg_decrease_cents": 1.9252422704199355,
           "avg_increase_speed_min": 91.91897998706199,
           "avg_decrease_speed_min": 33.73576372867621,
           "asymmetry_ratio": 0.3670162977594472
@@ -835,8 +835,8 @@
       {
         "brand": "AVIA XPress",
         "is_oligopol": false,
-        "avg_price": 1.7148,
-        "station_count": 207
+        "avg_price": 1.7146,
+        "station_count": 206
       },
       {
         "brand": "bft - Walther",
@@ -956,7 +956,7 @@
         "brand": "AVIA",
         "is_oligopol": false,
         "avg_price": 1.7302,
-        "station_count": 635
+        "station_count": 636
       },
       {
         "brand": "Q1",
@@ -1035,8 +1035,8 @@
       {
         "brand": "AVIA XPress",
         "is_oligopol": false,
-        "avg_price": 1.7956,
-        "station_count": 207
+        "avg_price": 1.7954,
+        "station_count": 206
       },
       {
         "brand": "BayWa",
@@ -1138,7 +1138,7 @@
         "brand": "AVIA",
         "is_oligopol": false,
         "avg_price": 1.8144,
-        "station_count": 635
+        "station_count": 636
       },
       {
         "brand": "ORLEN",
@@ -1299,10 +1299,10 @@
     },
     {
       "date": "2026-02-28",
-      "retail_avg": 1.7475018194207332,
+      "retail_avg": 1.747501819420733,
       "brent_eur": 0.38,
-      "spread": 1.3675018194207333,
-      "spread_z_score": 1.1957449429306757,
+      "spread": 1.367501819420733,
+      "spread_z_score": 1.1957449429306537,
       "is_abnormal": false
     }
   ],
@@ -1317,10 +1317,10 @@
     },
     {
       "date": "2026-02-25",
-      "retail_avg": 1.8169862004960153,
+      "retail_avg": 1.8169862004960156,
       "brent_eur": 0.3773,
-      "spread": 1.4396862004960154,
-      "spread_z_score": 0.7071067811865063,
+      "spread": 1.4396862004960156,
+      "spread_z_score": 0.7071067811865476,
       "is_abnormal": false
     },
     {
@@ -1328,15 +1328,15 @@
       "retail_avg": 1.8108206245996525,
       "brent_eur": 0.3815,
       "spread": 1.4293206245996526,
-      "spread_z_score": -1.137411299502287,
+      "spread_z_score": -1.137411299502281,
       "is_abnormal": false
     },
     {
       "date": "2026-02-27",
-      "retail_avg": 1.8280690858938902,
+      "retail_avg": 1.8280690858938904,
       "brent_eur": 0.38,
-      "spread": 1.44806908589389,
-      "spread_z_score": 1.2158784122310573,
+      "spread": 1.4480690858938905,
+      "spread_z_score": 1.215878412231089,
       "is_abnormal": false
     },
     {
@@ -1344,7 +1344,7 @@
       "retail_avg": 1.8377757917411812,
       "brent_eur": 0.38,
       "spread": 1.4577757917411813,
-      "spread_z_score": 1.40941636661039,
+      "spread_z_score": 1.409416366610384,
       "is_abnormal": false
     }
   ],

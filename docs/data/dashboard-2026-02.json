@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T20:37:11.919287",
+  "generated_at": "2026-09-13T20:54:45.507598",
   "parameters": {
     "radius_km": 25.0,
     "fuel_type": "e5",
@@ -10,12 +10,22 @@
   },
   "stats": {
     "station_count": 17865,
-    "price_record_count": 49521280,
+    "price_record_count": 49719321,
     "brent_price_count": 234,
-    "ingestion_count": 398,
+    "ingestion_count": 400,
     "price_date_from": "2026-02-24 23:00:03",
-    "price_date_to": "2026-09-11 21:55:14",
+    "price_date_to": "2026-09-12 21:56:32",
     "recent_ingestions": [
+      {
+        "file_path": "prices/2026-09-12",
+        "ingested_at": "2026-09-13 20:54:17.546177",
+        "row_count": 198041
+      },
+      {
+        "file_path": "stations/2026-09-12",
+        "ingested_at": "2026-09-13 20:53:50.948997",
+        "row_count": 17864
+      },
       {
         "file_path": "prices/2026-09-11",
         "ingested_at": "2026-09-12 20:36:45.334086",
@@ -55,16 +65,6 @@
         "file_path": "stations/2026-09-08",
         "ingested_at": "2026-09-09 20:58:27.978518",
         "row_count": 17862
-      },
-      {
-        "file_path": "prices/2026-09-07",
-        "ingested_at": "2026-09-08 21:13:48.516685",
-        "row_count": 224661
-      },
-      {
-        "file_path": "stations/2026-09-07",
-        "ingested_at": "2026-09-08 21:13:27.123232",
-        "row_count": 17861
       }
     ]
   },
@@ -133,7 +133,7 @@
         },
         {
           "brand": "ESSO",
-          "avg_increase_cents": 4.843589743589745,
+          "avg_increase_cents": 4.843589743589744,
           "avg_decrease_cents": 1.969795037756203,
           "avg_increase_speed_min": 54.476367521314664,
           "avg_decrease_speed_min": 40.67637540456289,
@@ -141,7 +141,7 @@
         },
         {
           "brand": "JET",
-          "avg_increase_cents": 4.246376811594205,
+          "avg_increase_cents": 4.246376811594204,
           "avg_decrease_cents": 2.2236180904522618,
           "avg_increase_speed_min": 96.89130434777209,
           "avg_decrease_speed_min": 30.36633165832141,
@@ -165,7 +165,7 @@
         },
         {
           "brand": "TotalEnergies",
-          "avg_increase_cents": 4.9824561403508785,
+          "avg_increase_cents": 4.982456140350879,
           "avg_decrease_cents": 2.0071428571428576,
           "avg_increase_speed_min": 88.74064327518276,
           "avg_decrease_speed_min": 38.51333333320383,
@@ -233,8 +233,8 @@
         },
         {
           "brand": "JET",
-          "avg_increase_cents": 4.26797385620915,
-          "avg_decrease_cents": 1.892822966507177,
+          "avg_increase_cents": 4.267973856209151,
+          "avg_decrease_cents": 1.8928229665071772,
           "avg_increase_speed_min": 87.19867465491275,
           "avg_decrease_speed_min": 30.943110047908206,
           "asymmetry_ratio": 0.35485757289735226
@@ -249,8 +249,8 @@
         },
         {
           "brand": "TotalEnergies",
-          "avg_increase_cents": 4.943462897526502,
-          "avg_decrease_cents": 2.113069016152717,
+          "avg_increase_cents": 4.943462897526503,
+          "avg_decrease_cents": 2.1130690161527172,
           "avg_increase_speed_min": 107.97161366339023,
           "avg_decrease_speed_min": 40.31708272138991,
           "asymmetry_ratio": 0.37340446579858944
@@ -397,8 +397,8 @@
       "rockets_feathers": [
         {
           "brand": "ARAL",
-          "avg_increase_cents": 5.401534526854221,
-          "avg_decrease_cents": 2.245074317317664,
+          "avg_increase_cents": 5.4015345268542205,
+          "avg_decrease_cents": 2.2450743173176635,
           "avg_increase_speed_min": 74.5085393579745,
           "avg_decrease_speed_min": 42.75630256934867,
           "asymmetry_ratio": 0.5738443262714765
@@ -498,7 +498,7 @@
         {
           "brand": "ESSO",
           "avg_increase_cents": 4.866103739445116,
-          "avg_decrease_cents": 1.9209095402867031,
+          "avg_decrease_cents": 1.9209095402867034,
           "avg_increase_speed_min": 48.695034177576176,
           "avg_decrease_speed_min": 41.12458395129654,
           "asymmetry_ratio": 0.844533424113176
@@ -506,7 +506,7 @@
         {
           "brand": "JET",
           "avg_increase_cents": 4.275324675324676,
-          "avg_decrease_cents": 1.9302730970366067,
+          "avg_decrease_cents": 1.9302730970366069,
           "avg_increase_speed_min": 92.75839826820733,
           "avg_decrease_speed_min": 27.021237652616783,
           "asymmetry_ratio": 0.2913077215335901
@@ -514,7 +514,7 @@
         {
           "brand": "Shell",
           "avg_increase_cents": 5.179470626210458,
-          "avg_decrease_cents": 1.925242270419936,
+          "avg_decrease_cents": 1.9252422704199355,
           "avg_increase_speed_min": 91.91897998706199,
           "avg_decrease_speed_min": 33.73576372867621,
           "asymmetry_ratio": 0.3670162977594472
@@ -835,8 +835,8 @@
       {
         "brand": "AVIA XPress",
         "is_oligopol": false,
-        "avg_price": 1.7148,
-        "station_count": 209
+        "avg_price": 1.7146,
+        "station_count": 208
       },
       {
         "brand": "bft - Walther",
@@ -956,7 +956,7 @@
         "brand": "AVIA",
         "is_oligopol": false,
         "avg_price": 1.7303,
-        "station_count": 633
+        "station_count": 634
       },
       {
         "brand": "Q1",
@@ -1035,8 +1035,8 @@
       {
         "brand": "AVIA XPress",
         "is_oligopol": false,
-        "avg_price": 1.7955,
-        "station_count": 209
+        "avg_price": 1.7954,
+        "station_count": 208
       },
       {
         "brand": "BayWa",
@@ -1138,7 +1138,7 @@
         "brand": "AVIA",
         "is_oligopol": false,
         "avg_price": 1.8145,
-        "station_count": 633
+        "station_count": 634
       },
       {
         "brand": "ORLEN",
@@ -1291,7 +1291,7 @@
     },
     {
       "date": "2026-02-27",
-      "retail_avg": 1.7406908500518063,
+      "retail_avg": 1.7406908500518061,
       "brent_eur": 0.38,
       "spread": 1.3606908500518062,
       "spread_z_score": 1.0811397830400653,

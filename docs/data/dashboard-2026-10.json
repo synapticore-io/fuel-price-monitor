@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-10T23:30:10.150619",
+  "generated_at": "2026-11-12T00:49:33.640997",
   "parameters": {
     "radius_km": 25.0,
     "fuel_type": "e5",
@@ -9,13 +9,23 @@
     "window_label": "2026-10"
   },
   "stats": {
-    "station_count": 17909,
-    "price_record_count": 62255763,
+    "station_count": 17912,
+    "price_record_count": 62528678,
     "brent_price_count": 273,
-    "ingestion_count": 516,
+    "ingestion_count": 518,
     "price_date_from": "2026-02-24 23:00:03",
-    "price_date_to": "2026-11-09 22:55:41",
+    "price_date_to": "2026-11-10 22:55:07",
     "recent_ingestions": [
+      {
+        "file_path": "prices/2026-11-10",
+        "ingested_at": "2026-11-12 00:48:02.210366",
+        "row_count": 272915
+      },
+      {
+        "file_path": "stations/2026-11-10",
+        "ingested_at": "2026-11-12 00:47:31.489411",
+        "row_count": 17911
+      },
       {
         "file_path": "prices/2026-11-09",
         "ingested_at": "2026-11-10 23:28:11.462561",
@@ -55,16 +65,6 @@
         "file_path": "stations/2026-11-06",
         "ingested_at": "2026-11-07 21:55:47.451371",
         "row_count": 17908
-      },
-      {
-        "file_path": "prices/2026-11-05",
-        "ingested_at": "2026-11-06 23:14:24.080795",
-        "row_count": 275449
-      },
-      {
-        "file_path": "stations/2026-11-05",
-        "ingested_at": "2026-11-06 23:14:00.289245",
-        "row_count": 17907
       }
     ]
   },
@@ -141,7 +141,7 @@
         },
         {
           "brand": "JET",
-          "avg_increase_cents": 21.522471910112365,
+          "avg_increase_cents": 21.52247191011236,
           "avg_decrease_cents": 1.90478515625,
           "avg_increase_speed_min": 489.93483146087505,
           "avg_decrease_speed_min": 85.45380859373654,
@@ -233,7 +233,7 @@
         },
         {
           "brand": "JET",
-          "avg_increase_cents": 21.569095477386938,
+          "avg_increase_cents": 21.569095477386934,
           "avg_decrease_cents": 2.428808175666344,
           "avg_increase_speed_min": 525.3975083754356,
           "avg_decrease_speed_min": 105.52571468027004,
@@ -263,15 +263,15 @@
       "leader_follower": [
         {
           "leader_brand": "ARAL",
-          "follower_brand": "ESSO",
-          "median_lag_minutes": 1.0333333333333334,
-          "event_count": 33
-        },
-        {
-          "leader_brand": "ARAL",
           "follower_brand": "JET",
           "median_lag_minutes": 1.0333333333333334,
           "event_count": 30
+        },
+        {
+          "leader_brand": "ARAL",
+          "follower_brand": "ESSO",
+          "median_lag_minutes": 1.0333333333333334,
+          "event_count": 33
         },
         {
           "leader_brand": "ARAL",
@@ -949,16 +949,16 @@
         "station_count": 96
       },
       {
+        "brand": "AVIA XPress",
+        "is_oligopol": false,
+        "avg_price": 2.2868,
+        "station_count": 214
+      },
+      {
         "brand": "ORLEN",
         "is_oligopol": false,
         "avg_price": 2.2869,
         "station_count": 91
-      },
-      {
-        "brand": "AVIA XPress",
-        "is_oligopol": false,
-        "avg_price": 2.2869,
-        "station_count": 213
       },
       {
         "brand": "freie Tankstelle",
@@ -981,8 +981,8 @@
       {
         "brand": "AVIA",
         "is_oligopol": false,
-        "avg_price": 2.2932,
-        "station_count": 632
+        "avg_price": 2.2933,
+        "station_count": 631
       },
       {
         "brand": "TotalEnergies",
@@ -1079,8 +1079,8 @@
       {
         "brand": "AVIA XPress",
         "is_oligopol": false,
-        "avg_price": 2.1788,
-        "station_count": 213
+        "avg_price": 2.179,
+        "station_count": 214
       },
       {
         "brand": "Hoyer",
@@ -1158,7 +1158,7 @@
         "brand": "AVIA",
         "is_oligopol": false,
         "avg_price": 2.1946,
-        "station_count": 632
+        "station_count": 631
       },
       {
         "brand": "AGIP ENI",
@@ -1167,16 +1167,16 @@
         "station_count": 474
       },
       {
-        "brand": "STAR",
-        "is_oligopol": false,
-        "avg_price": 2.1966,
-        "station_count": 482
-      },
-      {
         "brand": "ORLEN",
         "is_oligopol": false,
         "avg_price": 2.1966,
         "station_count": 91
+      },
+      {
+        "brand": "STAR",
+        "is_oligopol": false,
+        "avg_price": 2.1966,
+        "station_count": 482
       },
       {
         "brand": "ESSO",
@@ -1300,249 +1300,249 @@
     {
       "date": "2026-10-01",
       "retail_avg": 2.2910258854787506,
-      "brent_eur": 0.6687,
-      "spread": 1.6223258854787508,
+      "brent_eur": 0.6392,
+      "spread": 1.6518258854787506,
       "spread_z_score": 0.0,
       "is_abnormal": false
     },
     {
       "date": "2026-10-02",
       "retail_avg": 2.2851883194276947,
-      "brent_eur": 0.7892,
-      "spread": 1.4959883194276946,
-      "spread_z_score": -0.7071067811865476,
+      "brent_eur": 0.7593,
+      "spread": 1.5258883194276947,
+      "spread_z_score": -0.7071067811865482,
       "is_abnormal": false
     },
     {
       "date": "2026-10-03",
       "retail_avg": 2.2716466662311645,
-      "brent_eur": 0.7892,
-      "spread": 1.4824466662311644,
-      "spread_z_score": -0.6628867144012629,
+      "brent_eur": 0.7593,
+      "spread": 1.5123466662311644,
+      "spread_z_score": -0.6631358283991579,
       "is_abnormal": false
     },
     {
       "date": "2026-10-04",
       "retail_avg": 2.275902296752128,
-      "brent_eur": 0.7892,
-      "spread": 1.486702296752128,
-      "spread_z_score": -0.5231756920849013,
+      "brent_eur": 0.7593,
+      "spread": 1.516602296752128,
+      "spread_z_score": -0.5232393092784516,
       "is_abnormal": false
     },
     {
       "date": "2026-10-05",
       "retail_avg": 2.2618672559019948,
-      "brent_eur": 0.731,
-      "spread": 1.530867255901995,
-      "spread_z_score": 0.12342179787587446,
+      "brent_eur": 0.7046,
+      "spread": 1.5572672559019947,
+      "spread_z_score": 0.0771439446919194,
       "is_abnormal": false
     },
     {
       "date": "2026-10-06",
       "retail_avg": 2.2523797392382248,
-      "brent_eur": 0.7306,
-      "spread": 1.5217797392382248,
-      "spread_z_score": -0.030118716492438986,
+      "brent_eur": 0.7001,
+      "spread": 1.5522797392382248,
+      "spread_z_score": -0.00812133839394488,
       "is_abnormal": false
     },
     {
       "date": "2026-10-07",
       "retail_avg": 2.249619986381917,
-      "brent_eur": 0.7338,
-      "spread": 1.515819986381917,
-      "spread_z_score": -0.13525705027876697,
+      "brent_eur": 0.7091,
+      "spread": 1.5405199863819172,
+      "spread_z_score": -0.219117529516037,
       "is_abnormal": false
     },
     {
       "date": "2026-10-08",
-      "retail_avg": 2.282291939214389,
-      "brent_eur": 0.7582,
-      "spread": 1.5240919392143892,
-      "spread_z_score": 0.035959478668222265,
+      "retail_avg": 2.2822919392143888,
+      "brent_eur": 0.732,
+      "spread": 1.5502919392143888,
+      "spread_z_score": -0.013278483147176747,
       "is_abnormal": false
     },
     {
       "date": "2026-10-09",
       "retail_avg": 2.3035640346185486,
-      "brent_eur": 0.7573,
-      "spread": 1.5462640346185488,
-      "spread_z_score": 0.5017941255601921,
+      "brent_eur": 0.7298,
+      "spread": 1.5737640346185486,
+      "spread_z_score": 0.4847358284515133,
       "is_abnormal": false
     },
     {
       "date": "2026-10-10",
       "retail_avg": 2.3013154094256265,
-      "brent_eur": 0.7573,
-      "spread": 1.5440154094256267,
-      "spread_z_score": 0.4232532597500492,
+      "brent_eur": 0.7298,
+      "spread": 1.5715154094256265,
+      "spread_z_score": 0.40734181247763723,
       "is_abnormal": false
     },
     {
       "date": "2026-10-11",
       "retail_avg": 2.3042065732710344,
-      "brent_eur": 0.7573,
-      "spread": 1.5469065732710345,
-      "spread_z_score": 0.4688534981891149,
+      "brent_eur": 0.7298,
+      "spread": 1.5744065732710344,
+      "spread_z_score": 0.4543905813233532,
       "is_abnormal": false
     },
     {
       "date": "2026-10-12",
       "retail_avg": 2.2825657230622527,
-      "brent_eur": 0.7568,
-      "spread": 1.5257657230622526,
-      "spread_z_score": -0.07659603246811791,
+      "brent_eur": 0.731,
+      "spread": 1.5515657230622528,
+      "spread_z_score": -0.13538889475505225,
       "is_abnormal": false
     },
     {
       "date": "2026-10-13",
       "retail_avg": 2.2765576701662935,
-      "brent_eur": 0.7325,
-      "spread": 1.5440576701662936,
-      "spread_z_score": 0.4029585379110363,
+      "brent_eur": 0.7071,
+      "spread": 1.5694576701662935,
+      "spread_z_score": 0.33883394980527637,
       "is_abnormal": false
     },
     {
       "date": "2026-10-14",
       "retail_avg": 2.292394050326499,
-      "brent_eur": 0.737,
-      "spread": 1.5553940503264987,
-      "spread_z_score": 0.684796390124591,
+      "brent_eur": 0.711,
+      "spread": 1.581394050326499,
+      "spread_z_score": 0.6435310846062473,
       "is_abnormal": false
     },
     {
       "date": "2026-10-15",
-      "retail_avg": 2.2991113393114015,
-      "brent_eur": 0.7359,
-      "spread": 1.5632113393114015,
-      "spread_z_score": 0.8561263716690347,
+      "retail_avg": 2.299111339311401,
+      "brent_eur": 0.7091,
+      "spread": 1.5900113393114013,
+      "spread_z_score": 0.8417697434733067,
       "is_abnormal": false
     },
     {
       "date": "2026-10-16",
       "retail_avg": 2.2892348841054018,
-      "brent_eur": 0.695,
-      "spread": 1.594234884105402,
-      "spread_z_score": 1.5516657344666136,
+      "brent_eur": 0.667,
+      "spread": 1.6222348841054017,
+      "spread_z_score": 1.573037840983277,
       "is_abnormal": false
     },
     {
       "date": "2026-10-17",
       "retail_avg": 2.2847973501802294,
-      "brent_eur": 0.695,
-      "spread": 1.5897973501802296,
-      "spread_z_score": 1.3088611173473028,
+      "brent_eur": 0.667,
+      "spread": 1.6177973501802294,
+      "spread_z_score": 1.3255061932042778,
       "is_abnormal": false
     },
     {
       "date": "2026-10-18",
-      "retail_avg": 2.2842224446780386,
-      "brent_eur": 0.695,
-      "spread": 1.5892224446780387,
-      "spread_z_score": 1.2013753287514215,
+      "retail_avg": 2.284222444678039,
+      "brent_eur": 0.667,
+      "spread": 1.617222444678039,
+      "spread_z_score": 1.2153566562547866,
       "is_abnormal": false
     },
     {
       "date": "2026-10-19",
       "retail_avg": 2.2828877326454298,
-      "brent_eur": 0.692,
-      "spread": 1.5908877326454298,
-      "spread_z_score": 1.1643452014559519,
+      "brent_eur": 0.6658,
+      "spread": 1.6170877326454298,
+      "spread_z_score": 1.1357650458126392,
       "is_abnormal": false
     },
     {
       "date": "2026-10-20",
       "retail_avg": 2.2894995571642838,
-      "brent_eur": 0.671,
-      "spread": 1.6184995571642837,
-      "spread_z_score": 1.6823055023099667,
+      "brent_eur": 0.6462,
+      "spread": 1.6432995571642839,
+      "spread_z_score": 1.6360399867267887,
       "is_abnormal": false
     },
     {
       "date": "2026-10-21",
       "retail_avg": 2.285045636460606,
-      "brent_eur": 0.6836,
-      "spread": 1.6014456364606062,
-      "spread_z_score": 1.1910444986550974,
+      "brent_eur": 0.6571,
+      "spread": 1.6279456364606062,
+      "spread_z_score": 1.1832536685518527,
       "is_abnormal": false
     },
     {
       "date": "2026-10-22",
       "retail_avg": 2.3038329431626954,
-      "brent_eur": 0.7303,
-      "spread": 1.5735329431626954,
-      "spread_z_score": 0.5055194175289296,
+      "brent_eur": 0.7039,
+      "spread": 1.5999329431626954,
+      "spread_z_score": 0.48833681931552353,
       "is_abnormal": false
     },
     {
       "date": "2026-10-23",
       "retail_avg": 2.3002902193859627,
-      "brent_eur": 0.7472,
-      "spread": 1.5530902193859628,
-      "spread_z_score": 0.005148169306142729,
+      "brent_eur": 0.721,
+      "spread": 1.5792902193859626,
+      "spread_z_score": -0.02233899381126571,
       "is_abnormal": false
     },
     {
       "date": "2026-10-24",
       "retail_avg": 2.3161899932944783,
-      "brent_eur": 0.7472,
-      "spread": 1.5689899932944784,
-      "spread_z_score": 0.39387989579804245,
+      "brent_eur": 0.721,
+      "spread": 1.5951899932944782,
+      "spread_z_score": 0.37179813624818436,
       "is_abnormal": false
     },
     {
       "date": "2026-10-25",
       "retail_avg": 2.32188273606559,
-      "brent_eur": 0.7472,
-      "spread": 1.57468273606559,
-      "spread_z_score": 0.525545121596819,
+      "brent_eur": 0.721,
+      "spread": 1.6008827360655897,
+      "spread_z_score": 0.5059805290128474,
       "is_abnormal": false
     },
     {
       "date": "2026-10-26",
-      "retail_avg": 2.316054236050633,
-      "brent_eur": 0.7462,
-      "spread": 1.5698542360506331,
-      "spread_z_score": 0.3917113037629541,
+      "retail_avg": 2.3160542360506327,
+      "brent_eur": 0.7203,
+      "spread": 1.5957542360506327,
+      "spread_z_score": 0.3634789163257324,
       "is_abnormal": false
     },
     {
       "date": "2026-10-27",
       "retail_avg": 2.3222634116147867,
-      "brent_eur": 0.7169,
-      "spread": 1.6053634116147868,
-      "spread_z_score": 1.2617999382117728,
+      "brent_eur": 0.6944,
+      "spread": 1.6278634116147868,
+      "spread_z_score": 1.1661131975570707,
       "is_abnormal": false
     },
     {
       "date": "2026-10-28",
       "retail_avg": 2.312668271181574,
-      "brent_eur": 0.6942,
-      "spread": 1.618468271181574,
-      "spread_z_score": 1.5048705662020452,
+      "brent_eur": 0.6734,
+      "spread": 1.639268271181574,
+      "spread_z_score": 1.3883050098803673,
       "is_abnormal": false
     },
     {
       "date": "2026-10-29",
       "retail_avg": 2.3162428988827437,
-      "brent_eur": 0.6714,
-      "spread": 1.6448428988827437,
-      "spread_z_score": 1.9762070982949658,
+      "brent_eur": 0.6515,
+      "spread": 1.6647428988827437,
+      "spread_z_score": 1.8793385947340182,
       "is_abnormal": false
     },
     {
       "date": "2026-10-30",
       "retail_avg": 2.31066690960933,
-      "brent_eur": 0.6997,
-      "spread": 1.61096690960933,
-      "spread_z_score": 1.1228341201429988,
+      "brent_eur": 0.6764,
+      "spread": 1.6342669096093299,
+      "spread_z_score": 1.0858570537934662,
       "is_abnormal": false
     },
     {
       "date": "2026-10-31",
       "retail_avg": 2.318608808468633,
-      "brent_eur": 0.6997,
-      "spread": 1.6189088084686332,
-      "spread_z_score": 1.3190013463188894,
+      "brent_eur": 0.6764,
+      "spread": 1.642208808468633,
+      "spread_z_score": 1.303814423093507,
       "is_abnormal": false
     }
   ],
@@ -1550,249 +1550,249 @@
     {
       "date": "2026-10-01",
       "retail_avg": 2.200234590964493,
-      "brent_eur": 0.6687,
-      "spread": 1.531534590964493,
+      "brent_eur": 0.6392,
+      "spread": 1.561034590964493,
       "spread_z_score": 0.0,
       "is_abnormal": false
     },
     {
       "date": "2026-10-02",
       "retail_avg": 2.2066860737791627,
-      "brent_eur": 0.7892,
-      "spread": 1.4174860737791626,
-      "spread_z_score": -0.7071067811865475,
+      "brent_eur": 0.7593,
+      "spread": 1.4473860737791626,
+      "spread_z_score": -0.7071067811865482,
       "is_abnormal": false
     },
     {
       "date": "2026-10-03",
       "retail_avg": 2.2078523657067795,
-      "brent_eur": 0.7892,
-      "spread": 1.4186523657067793,
-      "spread_z_score": -0.5684260153714122,
+      "brent_eur": 0.7593,
+      "spread": 1.4485523657067794,
+      "spread_z_score": -0.5683943646675378,
       "is_abnormal": false
     },
     {
       "date": "2026-10-04",
       "retail_avg": 2.2135978640993077,
-      "brent_eur": 0.7892,
-      "spread": 1.4243978640993076,
-      "spread_z_score": -0.42360003697153553,
+      "brent_eur": 0.7593,
+      "spread": 1.4542978640993076,
+      "spread_z_score": -0.42332277182972833,
       "is_abnormal": false
     },
     {
       "date": "2026-10-05",
-      "retail_avg": 2.202306821667748,
-      "brent_eur": 0.731,
-      "spread": 1.4713068216677483,
-      "spread_z_score": 0.37715261276288947,
+      "retail_avg": 2.2023068216677486,
+      "brent_eur": 0.7046,
+      "spread": 1.4977068216677485,
+      "spread_z_score": 0.3251733348447027,
       "is_abnormal": false
     },
     {
       "date": "2026-10-06",
       "retail_avg": 2.2056243254888916,
-      "brent_eur": 0.7306,
-      "spread": 1.4750243254888917,
-      "spread_z_score": 0.4127954810874525,
+      "brent_eur": 0.7001,
+      "spread": 1.5055243254888917,
+      "spread_z_score": 0.441136379994578,
       "is_abnormal": false
     },
     {
       "date": "2026-10-07",
       "retail_avg": 2.20933304682962,
-      "brent_eur": 0.7338,
-      "spread": 1.4755330468296202,
-      "spread_z_score": 0.3921834187079099,
+      "brent_eur": 0.7091,
+      "spread": 1.5002330468296203,
+      "spread_z_score": 0.300691167204221,
       "is_abnormal": false
     },
     {
       "date": "2026-10-08",
-      "retail_avg": 2.229741730779684,
-      "brent_eur": 0.7582,
-      "spread": 1.471541730779684,
-      "spread_z_score": 0.27866177230368194,
+      "retail_avg": 2.2297417307796836,
+      "brent_eur": 0.732,
+      "spread": 1.4977417307796836,
+      "spread_z_score": 0.22620161319683574,
       "is_abnormal": false
     },
     {
       "date": "2026-10-09",
       "retail_avg": 2.2378110178285775,
-      "brent_eur": 0.7573,
-      "spread": 1.4805110178285776,
-      "spread_z_score": 0.47580023190574533,
+      "brent_eur": 0.7298,
+      "spread": 1.5080110178285775,
+      "spread_z_score": 0.4620980424129189,
       "is_abnormal": false
     },
     {
       "date": "2026-10-10",
       "retail_avg": 2.2329938674773557,
-      "brent_eur": 0.7573,
-      "spread": 1.4756938674773559,
-      "spread_z_score": 0.32785033217782233,
+      "brent_eur": 0.7298,
+      "spread": 1.5031938674773557,
+      "spread_z_score": 0.31306436828049194,
       "is_abnormal": false
     },
     {
       "date": "2026-10-11",
       "retail_avg": 2.2356947801605047,
-      "brent_eur": 0.7573,
-      "spread": 1.4783947801605049,
-      "spread_z_score": 0.3846212469626988,
+      "brent_eur": 0.7298,
+      "spread": 1.5058947801605047,
+      "spread_z_score": 0.37198225933241413,
       "is_abnormal": false
     },
     {
       "date": "2026-10-12",
       "retail_avg": 2.2250639337655,
-      "brent_eur": 0.7568,
-      "spread": 1.4682639337655,
-      "spread_z_score": 0.08009947695398936,
+      "brent_eur": 0.731,
+      "spread": 1.4940639337655002,
+      "spread_z_score": 0.013554463670091757,
       "is_abnormal": false
     },
     {
       "date": "2026-10-13",
       "retail_avg": 2.2342000897658476,
-      "brent_eur": 0.7325,
-      "spread": 1.5017000897658477,
-      "spread_z_score": 1.0293121880928686,
+      "brent_eur": 0.7071,
+      "spread": 1.5271000897658475,
+      "spread_z_score": 0.9783532769790954,
       "is_abnormal": false
     },
     {
       "date": "2026-10-14",
       "retail_avg": 2.2282979024851066,
-      "brent_eur": 0.737,
-      "spread": 1.4912979024851065,
-      "spread_z_score": 0.6706032805520756,
+      "brent_eur": 0.711,
+      "spread": 1.5172979024851068,
+      "spread_z_score": 0.6346466875442643,
       "is_abnormal": false
     },
     {
       "date": "2026-10-15",
-      "retail_avg": 2.214825464858953,
-      "brent_eur": 0.7359,
-      "spread": 1.478925464858953,
-      "spread_z_score": 0.2697448906184625,
+      "retail_avg": 2.214825464858954,
+      "brent_eur": 0.7091,
+      "spread": 1.505725464858954,
+      "spread_z_score": 0.2508008047284248,
       "is_abnormal": false
     },
     {
       "date": "2026-10-16",
       "retail_avg": 2.20174045041544,
-      "brent_eur": 0.695,
-      "spread": 1.5067404504154402,
-      "spread_z_score": 1.0952974243368594,
+      "brent_eur": 0.667,
+      "spread": 1.53474045041544,
+      "spread_z_score": 1.1326435282634804,
       "is_abnormal": false
     },
     {
       "date": "2026-10-17",
-      "retail_avg": 2.1965372692113068,
-      "brent_eur": 0.695,
-      "spread": 1.501537269211307,
-      "spread_z_score": 0.8774621779658427,
+      "retail_avg": 2.196537269211307,
+      "brent_eur": 0.667,
+      "spread": 1.5295372692113072,
+      "spread_z_score": 0.907626268704298,
       "is_abnormal": false
     },
     {
       "date": "2026-10-18",
       "retail_avg": 2.1963483483178154,
-      "brent_eur": 0.695,
-      "spread": 1.5013483483178156,
-      "spread_z_score": 0.8298341520206909,
+      "brent_eur": 0.667,
+      "spread": 1.5293483483178154,
+      "spread_z_score": 0.8571574793953287,
       "is_abnormal": false
     },
     {
       "date": "2026-10-19",
       "retail_avg": 2.1949067555768504,
-      "brent_eur": 0.692,
-      "spread": 1.5029067555768505,
-      "spread_z_score": 0.8408955026468791,
+      "brent_eur": 0.6658,
+      "spread": 1.5291067555768505,
+      "spread_z_score": 0.8115603526938951,
       "is_abnormal": false
     },
     {
       "date": "2026-10-20",
       "retail_avg": 2.199175294960254,
-      "brent_eur": 0.671,
-      "spread": 1.5281752949602538,
-      "spread_z_score": 1.5279529526192799,
+      "brent_eur": 0.6462,
+      "spread": 1.552975294960254,
+      "spread_z_score": 1.4800522421803797,
       "is_abnormal": false
     },
     {
       "date": "2026-10-21",
       "retail_avg": 2.184300565967832,
-      "brent_eur": 0.6836,
-      "spread": 1.500700565967832,
-      "spread_z_score": 0.6338764804057162,
+      "brent_eur": 0.6571,
+      "spread": 1.527200565967832,
+      "spread_z_score": 0.6206156309867307,
       "is_abnormal": false
     },
     {
       "date": "2026-10-22",
       "retail_avg": 2.194725170539473,
-      "brent_eur": 0.7303,
-      "spread": 1.4644251705394729,
-      "spread_z_score": -0.5199512944295573,
+      "brent_eur": 0.7039,
+      "spread": 1.4908251705394728,
+      "spread_z_score": -0.563747141104927,
       "is_abnormal": false
     },
     {
       "date": "2026-10-23",
       "retail_avg": 2.1863659796582593,
-      "brent_eur": 0.7472,
-      "spread": 1.4391659796582594,
-      "spread_z_score": -1.2686925841347603,
+      "brent_eur": 0.721,
+      "spread": 1.4653659796582592,
+      "spread_z_score": -1.329316145056107,
       "is_abnormal": false
     },
     {
       "date": "2026-10-24",
       "retail_avg": 2.193722628987768,
-      "brent_eur": 0.7472,
-      "spread": 1.446522628987768,
-      "spread_z_score": -0.987958359039643,
+      "brent_eur": 0.721,
+      "spread": 1.4727226289877677,
+      "spread_z_score": -1.0390133764250855,
       "is_abnormal": false
     },
     {
       "date": "2026-10-25",
       "retail_avg": 2.193733697009408,
-      "brent_eur": 0.7472,
-      "spread": 1.446533697009408,
-      "spread_z_score": -0.9493572426402422,
+      "brent_eur": 0.721,
+      "spread": 1.4727336970094078,
+      "spread_z_score": -0.9963647433337728,
       "is_abnormal": false
     },
     {
       "date": "2026-10-26",
       "retail_avg": 2.185261122064289,
-      "brent_eur": 0.7462,
-      "spread": 1.439061122064289,
-      "spread_z_score": -1.1366416242644426,
+      "brent_eur": 0.7203,
+      "spread": 1.464961122064289,
+      "spread_z_score": -1.191028104917229,
       "is_abnormal": false
     },
     {
       "date": "2026-10-27",
       "retail_avg": 2.1732837751291125,
-      "brent_eur": 0.7169,
-      "spread": 1.4563837751291127,
-      "spread_z_score": -0.5671544528502329,
+      "brent_eur": 0.6944,
+      "spread": 1.4788837751291126,
+      "spread_z_score": -0.7184351199051432,
       "is_abnormal": false
     },
     {
       "date": "2026-10-28",
-      "retail_avg": 2.1626103781845103,
-      "brent_eur": 0.6942,
-      "spread": 1.4684103781845104,
-      "spread_z_score": -0.17331818870020527,
+      "retail_avg": 2.1626103781845107,
+      "brent_eur": 0.6734,
+      "spread": 1.4892103781845107,
+      "spread_z_score": -0.372648723993476,
       "is_abnormal": false
     },
     {
       "date": "2026-10-29",
       "retail_avg": 2.16753225917409,
-      "brent_eur": 0.6714,
-      "spread": 1.4961322591740902,
-      "spread_z_score": 0.7242308889586835,
+      "brent_eur": 0.6515,
+      "spread": 1.5160322591740902,
+      "spread_z_score": 0.5089273459430089,
       "is_abnormal": false
     },
     {
       "date": "2026-10-30",
       "retail_avg": 2.1634283876519516,
-      "brent_eur": 0.6997,
-      "spread": 1.4637283876519516,
-      "spread_z_score": -0.3502886519417417,
+      "brent_eur": 0.6764,
+      "spread": 1.4870283876519514,
+      "spread_z_score": -0.4600818960041379,
       "is_abnormal": false
     },
     {
       "date": "2026-10-31",
       "retail_avg": 2.169312187986171,
-      "brent_eur": 0.6997,
-      "spread": 1.4696121879861712,
-      "spread_z_score": -0.0871167603533856,
+      "brent_eur": 0.6764,
+      "spread": 1.492912187986171,
+      "spread_z_score": -0.19674779066281753,
       "is_abnormal": false
     }
   ],
@@ -1801,20 +1801,20 @@
       "period_days": 31,
       "abnormal_days": 0,
       "abnormal_pct": 0.0,
-      "max_z_score": 1.98,
+      "max_z_score": 1.88,
       "max_z_date": "2026-10-29",
       "threshold_z": 2.0,
-      "mean_spread_cents": 156.5,
-      "stddev_spread_cents": 4.3
+      "mean_spread_cents": 159.2,
+      "stddev_spread_cents": 4.1
     },
     "e5": {
       "period_days": 31,
       "abnormal_days": 0,
       "abnormal_pct": 0.0,
-      "max_z_score": 1.53,
+      "max_z_score": 1.48,
       "max_z_date": "2026-10-20",
       "threshold_z": 2.0,
-      "mean_spread_cents": 147.4,
+      "mean_spread_cents": 150.0,
       "stddev_spread_cents": 2.9
     }
   },
@@ -1823,9 +1823,9 @@
       "retail_avg_eur": 2.29,
       "energy_tax_eur": 0.47,
       "co2_eur": 0.15,
-      "brent_eur": 0.72,
+      "brent_eur": 0.7,
       "vat_eur": 0.37,
-      "residual_eur": 0.58,
+      "residual_eur": 0.6,
       "co2_price_eur_per_ton": 55.0,
       "co2_kg_per_liter": 2.64,
       "co2_price_source": "BEHG \u00a710, Mindestpreis Korridor 2026 (55\u201365 \u20ac/t); erste EEX-Auktion ab 1.7.2026",
@@ -1835,9 +1835,9 @@
       "retail_avg_eur": 2.2,
       "energy_tax_eur": 0.65,
       "co2_eur": 0.13,
-      "brent_eur": 0.72,
+      "brent_eur": 0.7,
       "vat_eur": 0.35,
-      "residual_eur": 0.35,
+      "residual_eur": 0.37,
       "co2_price_eur_per_ton": 55.0,
       "co2_kg_per_liter": 2.32,
       "co2_price_source": "BEHG \u00a710, Mindestpreis Korridor 2026 (55\u201365 \u20ac/t); erste EEX-Auktion ab 1.7.2026",
